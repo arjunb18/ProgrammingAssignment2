@@ -49,8 +49,11 @@ export const SPEECH = [
   [/moonshine/i, { tokPerAudioSec: 3, decB: 0.1, encTflopPerAudioSec: 0.005 }],
   [/voxtral/i, { tokPerAudioSec: 3, decB: 3.4, encTflopPerAudioSec: 0.06 }],
   [/qwen3-asr/i, { tokPerAudioSec: 3, decB: 1.4, encTflopPerAudioSec: 0.03 }],
-  [/kokoro/i, { tokPerAudioSec: 0, decB: 0, encTflopPerAudioSec: 0.002 }],
-  [/piper/i, { tokPerAudioSec: 0, decB: 0, encTflopPerAudioSec: 0.0005 }],
+  // Kokoro/Piper are rated from measured CPU speeds rather than parameter counts (their vocoders
+  // dominate): Kokoro ≈ 0.87× real time on a 2-core ARM CPU and ≈ 2× on one M1 Max core in WASM;
+  // Piper medium ≈ 8× on the same 2-core CPU (obole-ia/tts-cpu-benchmark, briantung.me).
+  [/kokoro/i, { tokPerAudioSec: 0, decB: 0, encTflopPerAudioSec: 0.08 }],
+  [/piper/i, { tokPerAudioSec: 0, decB: 0, encTflopPerAudioSec: 0.007 }],
   [/xtts/i, { tokPerAudioSec: 22, decB: 0.4, encTflopPerAudioSec: 0.01 }],
   [/f5-tts/i, { tokPerAudioSec: 0, decB: 0, encTflopPerAudioSec: 4 }],
   [/orpheus/i, { tokPerAudioSec: 83, decB: 3.3, encTflopPerAudioSec: 0.01 }],
@@ -112,6 +115,25 @@ export const BROWSER_OTHER = [
   [/^gpt-oss-20b/i, { tjs: true, webgpuOnly: true }],
   [/^gemma 3n e[24]b/i, { other: 'Runs in Chrome through Google’s MediaPipe / LiteRT-LM web runtime', webgpuOnly: true }],
   [/^gemma 4 e[24]b/i, { other: 'Runs in Chrome through Google’s MediaPipe / LiteRT-LM web runtime', webgpuOnly: true }],
+];
+
+// Models that must never be offered as "the chat model to try": task-prompted captioners/OCR
+// models and tiny bases meant for fine-tuning. build-data sets `chat: false` on them.
+export const NOT_CHAT = [
+  [/^florence-2/i, 'task-prompted captioning/OCR/detection, not chat'],
+  [/^moondream/i, 'captioning and pointing model, not a general assistant'],
+  [/^gemma 3 270m/i, 'base for task-specific fine-tuning'],
+  [/^lfm2\.5 350m/i, 'extraction/classification model'],
+];
+
+// Models with no mainstream runtime yet (a llama.cpp fork, an unmerged PR build or server-only
+// engines). build-data sets `needsFork: true`; the headline does not recommend them.
+export const NEEDS_FORK = [
+  [/^ternary bonsai/i, "needs PrismML's llama.cpp fork"],
+  [/^glm-5\.3-flash/i, 'needs a llama.cpp PR build'],
+  [/^minimax m3\b/i, 'GGUFs need a llama.cpp PR build'],
+  [/^deepseek v4\.1 flash/i, 'no llama.cpp/MLX support yet'],
+  [/^command a\+/i, 'vLLM builds only; GGUF support unconfirmed'],
 ];
 
 // Duplicates across the researched catalogs: [name regex to drop, reason].

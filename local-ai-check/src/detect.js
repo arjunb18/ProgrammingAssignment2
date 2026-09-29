@@ -20,21 +20,34 @@
     var m;
     var touch = typeof n.maxTouchPoints === 'number' ? n.maxTouchPoints : 0;
 
-    if (/iPhone|iPod/.test(ua)) { r.os = 'ios'; }
+    // KaiOS first: some KaiOS builds also say "Android". HarmonyOS 2-4 phones say "Android" and run
+    // Android apps, so they stay 'android'; HarmonyOS NEXT (OpenHarmony/ArkWeb) has no Android token.
+    if (/KAIOS/i.test(ua)) { r.os = 'kaios'; }
+    else if (/iPhone|iPod/.test(ua)) { r.os = 'ios'; }
     else if (/iPad/.test(ua) || (/Macintosh/.test(ua) && touch > 1)) { r.os = 'ipados'; }
     else if (/Android/.test(ua)) { r.os = 'android'; }
+    else if (/OpenHarmony|HarmonyOS/i.test(ua)) { r.os = 'harmonyos'; }
     else if (/CrOS/.test(ua)) { r.os = 'chromeos'; }
     else if (/Windows/.test(ua)) { r.os = 'windows'; }
     else if (/Macintosh|Mac OS X/.test(ua)) { r.os = 'mac'; }
     else if (/Linux|X11/.test(ua)) { r.os = 'linux'; }
 
     if ((m = ua.match(/OS (\d+)[_.](\d+)/)) && (r.os === 'ios' || r.os === 'ipados')) { r.osVersion = m[1] + '.' + m[2]; }
+    else if (r.os === 'android' && /Android 10; K\)/.test(ua)) { r.osVersion = ''; } // reduced UA: frozen at 10, real version comes from client hints
     else if ((m = ua.match(/Android (\d+(?:\.\d+)?)/))) { r.osVersion = m[1]; }
     else if ((m = ua.match(/Windows NT (\d+\.\d+)/))) { r.osVersion = m[1] === '10.0' ? '10 or 11' : m[1]; }
+    else if ((m = ua.match(/(?:OpenHarmony|HarmonyOS)[ \/](\d+(?:\.\d+)?)/i))) { r.osVersion = m[1]; }
+    else if ((m = ua.match(/KAIOS\/(\d+(?:\.\d+)?)/i))) { r.osVersion = m[1]; }
 
     if (r.os === 'ios') { r.formFactor = 'phone'; }
     else if (r.os === 'ipados') { r.formFactor = 'tablet'; }
     else if (r.os === 'android') { r.formFactor = /Mobile/.test(ua) ? 'phone' : 'tablet'; }
+    else if (r.os === 'kaios') { r.formFactor = 'phone'; }
+    else if (r.os !== 'windows' && r.os !== 'mac' && r.os !== 'chromeos') {
+      // Any other OS that calls itself a phone or tablet (HarmonyOS NEXT, Linux phones…).
+      if (/\(Tablet;|\bTablet\b/.test(ua)) { r.formFactor = 'tablet'; }
+      else if (/\bMobile\b|\(Phone;|\bPhone\b/.test(ua)) { r.formFactor = 'phone'; }
+    }
 
     if (r.os === 'android' && (m = ua.match(/Android [^;)]*;\s*(?:[a-z]{2}[-_][a-z]{2};\s*)?([^;)]+?)(?:\s+Build\/|\))/i))) {
       var model = m[1].replace(/^\s+|\s+$/g, '');
@@ -42,12 +55,20 @@
     }
 
     var browsers = [
+      // In-app browsers of social apps come first: their UAs also carry Chrome/ or Safari tokens.
+      [/Instagram (\d+)/, 'Instagram in-app browser'], [/FBAV\/(\d+)/, 'Facebook in-app browser'],
+      [/musical_ly_(\d+)|BytedanceWebview\/(\d+)/, 'TikTok in-app browser'], [/GSA\/(\d+)/, 'Google app'],
+      [/KAIOS\/(\d+(?:\.\d+)?)/i, 'KaiOS browser'], [/HuaweiBrowser\/(\d+)/, 'Huawei Browser'], [/ArkWeb\/(\d+)/, 'ArkWeb'],
       [/EdgA?\/(\d+)/, 'Edge'], [/EdgiOS\/(\d+)/, 'Edge'], [/OPR\/(\d+)/, 'Opera'], [/SamsungBrowser\/(\d+)/, 'Samsung Internet'],
       [/FxiOS\/(\d+)/, 'Firefox'], [/Firefox\/(\d+)/, 'Firefox'], [/CriOS\/(\d+)/, 'Chrome'], [/YaBrowser\/(\d+)/, 'Yandex Browser'],
       [/Vivaldi\/(\d+)/, 'Vivaldi'], [/Chrome\/(\d+)/, 'Chrome'], [/Version\/(\d+(?:\.\d+)?).*Safari/, 'Safari']
     ];
     for (var i = 0; i < browsers.length; i++) {
-      if ((m = ua.match(browsers[i][0]))) { r.browser = browsers[i][1]; r.browserVersion = m[1]; break; }
+      if ((m = ua.match(browsers[i][0]))) { r.browser = browsers[i][1]; r.browserVersion = m[1] || m[2] || ''; break; }
+    }
+    if (r.browser === 'Unknown browser' && (r.os === 'ios' || r.os === 'ipados')) {
+      // Apps that embed a web view without Safari's "Version/…" token (every iOS browser is WebKit).
+      r.browser = 'In-app browser (Safari engine)';
     }
     if (r.os === 'ios' || r.os === 'ipados') { r.engine = 'webkit'; }
     else if (/Firefox\//.test(ua)) { r.engine = 'gecko'; }
@@ -68,19 +89,31 @@
     } catch (e) { return Promise.resolve(null); }
     return U.withTimeout(p, 1000, null).then(function (h) {
       if (!h) { return null; }
-      if (n.userAgentData.mobile === true && ua.formFactor === 'desktop') { ua.formFactor = 'phone'; }
-      if (h.model) { ua.model = h.model; }
-      if (ua.os === 'windows' && h.platformVersion) {
-        var major = parseInt(String(h.platformVersion).split('.')[0], 10);
-        ua.osVersion = major >= 13 ? '11' : (major > 0 ? '10' : ua.osVersion);
-      }
-      if (ua.os === 'mac' && h.platformVersion) { ua.osVersion = h.platformVersion; }
-      if (h.formFactors && h.formFactors.length) {
-        var ff = h.formFactors.join(',').toLowerCase();
-        if (ff.indexOf('tablet') >= 0 && ua.formFactor === 'desktop' && ua.os === 'android') { ua.formFactor = 'tablet'; }
-      }
+      applyHints(ua, h, n.userAgentData);
       return h;
     }, function () { return null; });
+  }
+
+  // Runs before readMemory, so a corrected OS / form factor also picks the right RAM cap.
+  function applyHints(ua, h, uad) {
+    var platform = uad && uad.platform ? String(uad.platform) : '';
+    var ff = h.formFactors && h.formFactors.length ? String(h.formFactors.join(',')).toLowerCase() : '';
+    // Chrome on large Android tablets (and Samsung DeX) sends a desktop "X11; Linux x86_64" UA.
+    // Real ARM Linux desktops report the 'Desktop' form factor, so they are not affected.
+    if (ua.os === 'linux' && (platform === 'Android' ||
+        (h.architecture === 'arm' && (ff.indexOf('tablet') >= 0 || ff.indexOf('mobile') >= 0)))) {
+      ua.os = 'android';
+      ua.formFactor = ff.indexOf('mobile') >= 0 && ff.indexOf('tablet') < 0 ? 'phone' : 'tablet';
+    }
+    if (uad && uad.mobile === true && ua.formFactor === 'desktop') { ua.formFactor = 'phone'; }
+    if (h.model) { ua.model = h.model; }
+    var major = h.platformVersion ? parseInt(String(h.platformVersion).split('.')[0], 10) : 0;
+    if (ua.os === 'windows' && h.platformVersion) {
+      ua.osVersion = major >= 13 ? '11' : (major > 0 ? '10' : ua.osVersion);
+    }
+    if (ua.os === 'mac' && h.platformVersion) { ua.osVersion = h.platformVersion; }
+    if (ua.os === 'android' && major > 0) { ua.osVersion = String(major); }
+    if (ua.os === 'android' && ff.indexOf('tablet') >= 0 && ff.indexOf('mobile') < 0) { ua.formFactor = 'tablet'; }
   }
 
   // ---------------------------------------------------------------- memory
@@ -114,12 +147,17 @@
       if (!desktop && dm === 4) { mem.estimatedGB = 6; mem.confidence = 'medium'; } // 4-6 GB phones report 4
     } else {
       // No API (Safari, Firefox): fall back to common configurations per platform.
-      var guess = { ios: 6, ipados: 8, android: 8, mac: 16, windows: 16, linux: 16, chromeos: 8, other: 8 };
-      mem.estimatedGB = guess[ua.os] || 8;
+      mem.estimatedGB = platformGuessGB(ua);
       mem.source = 'default';
       mem.confidence = 'low';
     }
     return mem;
+  }
+
+  // Common RAM per platform, used when the browser does not say. KaiOS phones have 256-512 MB.
+  var RAM_GUESS = { ios: 6, ipados: 8, android: 8, harmonyos: 8, kaios: 0.5, mac: 16, windows: 16, linux: 16, chromeos: 8 };
+  function platformGuessGB(ua) {
+    return RAM_GUESS[ua.os] || (ua.formFactor === 'desktop' ? 8 : 4);
   }
 
   // ---------------------------------------------------------------- WebGL
@@ -152,6 +190,15 @@
       out.masked = /^(webkit webgl|mozilla|generic renderer|apple gpu)$/i.test(out.renderer);
       out.bucketed = /or similar/i.test(out.renderer);
       out.software = /swiftshader|llvmpipe|softpipe|basic render|software rasterizer/i.test(out.renderer);
+      // Virtual machine GPUs (VMware, VirtualBox, QEMU/virgl, Parallels) forward to the host or to software.
+      out.virtual = /svga3d|vmware|virtualbox|virgl|virtio|parallels/i.test(out.renderer);
+      // Apple GPUs expose ASTC texture compression; the Intel/AMD GPUs of Intel Macs do not.
+      // Safari before 26 says "Apple GPU" on both, so this is the only Apple-silicon signal there.
+      out.astc = null;
+      try {
+        var exts = gl.getSupportedExtensions ? gl.getSupportedExtensions() : null;
+        if (exts && exts.length !== undefined) { out.astc = String(exts.join(',')).indexOf('WEBGL_compressed_texture_astc') >= 0; }
+      } catch (e4) { out.astc = null; }
       try {
         var lose = gl.getExtension('WEBGL_lose_context');
         if (lose) { lose.loseContext(); }
@@ -266,14 +313,29 @@
   // Names for the WebGPU architecture field when the renderer string is hidden.
   var ARCH_HINTS = {
     'blackwell': 'NVIDIA GeForce RTX 50-series', 'ada': 'NVIDIA GeForce RTX 40-series', 'ada-lovelace': 'NVIDIA GeForce RTX 40-series',
-    'ampere': 'NVIDIA GeForce RTX 30-series', 'turing': 'NVIDIA GeForce RTX 20 / GTX 16-series', 'pascal': 'NVIDIA GeForce GTX 10-series',
+    'lovelace': 'NVIDIA GeForce RTX 40-series', 'ampere': 'NVIDIA GeForce RTX 30-series', 'turing': 'NVIDIA GeForce RTX 20 / GTX 16-series',
+    'pascal': 'NVIDIA GeForce GTX 10-series',
     'rdna-4': 'AMD Radeon RX 9000-series', 'rdna-3': 'AMD Radeon RX 7000-series or 780M/890M', 'rdna-2': 'AMD Radeon RX 6000-series or 680M',
-    'xe-2lpg': 'Intel Arc 130V/140V (Lunar Lake)', 'xe-lpg': 'Intel Arc (Meteor Lake)', 'gen-12lp': 'Intel Iris Xe / UHD', 'xe-hpg': 'Intel Arc A-series',
-    'apple': 'Apple GPU', 'metal-3': 'Apple GPU'
+    'rdna-1': 'AMD Radeon RX 5000-series', 'gcn-5': 'AMD Radeon Vega',
+    'xe-3lpg': 'Intel Arc (Panther Lake)', 'xe-2lpg': 'Intel Arc 130V/140V (Lunar Lake)', 'xe-lpg': 'Intel Arc (Meteor Lake)',
+    'gen-12lp': 'Intel Iris Xe / UHD', 'gen-11': 'Intel Iris Plus (Ice Lake)', 'gen-9': 'Intel HD / UHD Graphics', 'xe-hpg': 'Intel Arc A-series',
+    'adreno-8xx': 'Qualcomm Adreno 800-series', 'adreno-7xx': 'Qualcomm Adreno 700-series', 'adreno-6xx': 'Qualcomm Adreno 600-series',
+    'valhall': 'Arm Mali (Valhall)', 'apple': 'Apple GPU', 'metal-3': 'Apple GPU', 'common-3': 'Apple GPU'
   };
 
+  // Vendor named by a renderer / vendor string, when it names exactly one of the PC GPU makers.
+  function pcVendor(s) {
+    s = String(s || '').toLowerCase();
+    var found = [];
+    if (/nvidia|geforce|quadro/.test(s)) { found.push('nvidia'); }
+    if (/\bamd\b|radeon|\bati\b/.test(s)) { found.push('amd'); }
+    if (/intel/.test(s)) { found.push('intel'); }
+    return found.length === 1 ? found[0] : '';
+  }
+
   function identifyGpu(webgl, wg, ua) {
-    var res = { renderer: webgl.renderer || '', vendorString: webgl.vendor || '', name: '', entry: null, source: 'none', confidence: 'low', archHint: '', software: !!webgl.software };
+    var res = { renderer: webgl.renderer || '', vendorString: webgl.vendor || '', name: '', entry: null, source: 'none', confidence: 'low',
+      archHint: '', software: !!(webgl.software || webgl.virtual), virtual: !!webgl.virtual, bucketed: !!webgl.bucketed, hybrid: false };
     var info = wg.info || {};
     var match = LAC.matchGpu || function () { return null; };
     if (info.architecture) { res.archHint = ARCH_HINTS[String(info.architecture).toLowerCase()] || ''; }
@@ -286,16 +348,34 @@
     var best = fromGL;
     if (fromGPU && (!best || (fromGPU.bandwidthGBs || 0) > (best.bandwidthGBs || 0))) { best = fromGPU; }
 
-    if (best && webgl.bucketed && best === fromGL) {
-      // Firefox's bucket names a representative GPU, not necessarily the real one.
-      if (best.vendor === 'apple') {
-        best = ua.os === 'mac' ? match('generic apple silicon mac') : best;
-        res.entry = best; res.name = best.name; res.source = 'webgl'; res.confidence = 'low';
+    if (webgl.bucketed && best === fromGL) {
+      // Firefox's bucket names a representative GPU of the vendor ("GTX 980", "R9 200 Series",
+      // "HD Graphics 400", "Apple M1"), not the real one: keep only the vendor.
+      var bucketVendor = pcVendor(webgl.renderer + ' ' + webgl.vendor);
+      var cls = null;
+      if ((best && best.vendor === 'apple') || /^apple /i.test(webgl.renderer)) {
+        cls = ua.os === 'mac' ? match('generic apple silicon mac') : best;
+      } else if (bucketVendor) {
+        cls = match('generic ' + bucketVendor + ' gpu');
       } else {
-        res.entry = best; res.name = best.name; res.source = 'webgl'; res.confidence = 'medium';
+        cls = best; // phone GPU families (Adreno, Mali): the table already has family-level entries
       }
+      if (cls) { res.entry = cls; res.name = cls.name; res.source = 'webgl'; res.confidence = 'low'; }
     } else if (best) {
-      res.entry = best; res.name = best.name; res.source = best === fromGPU ? 'webgpu' : 'webgl'; res.confidence = 'high';
+      res.entry = best; res.name = best.name; res.source = best === fromGPU ? 'webgpu' : 'webgl';
+      // A "Laptop GPU" string that only matched a desktop card gets a derived laptop entry.
+      res.confidence = best.laptopGuess ? 'medium' : 'high';
+    }
+
+    // Chrome leaves adapter.info.description empty, but the vendor of the high-performance adapter
+    // still shows a discrete GPU that WebGL (running on the integrated one) does not name.
+    var wgVendor = String(info.vendor || '').toLowerCase();
+    if (res.entry && !webgl.bucketed && wg.available && res.source === 'webgl' &&
+        (wgVendor === 'nvidia' || wgVendor === 'amd') && wgVendor !== res.entry.vendor &&
+        (res.entry.kind === 'integrated' || res.entry.vendor === 'intel')) {
+      res.hybrid = true;
+      res.discreteVendor = wgVendor;
+      res.confidence = 'low';
     }
 
     if (!res.entry) {
@@ -319,25 +399,42 @@
     if (ua.os === 'ipados') { return match('generic ipad'); }
     if (ua.os === 'mac') {
       // Safari 26+ WebGPU names the vendor: 'apple' on Apple silicon, 'intelr'/'amd' on Intel Macs.
-      // Firefox only offers WebGPU on Apple silicon Macs.
+      // Firefox only offers WebGPU on Apple silicon Macs. Older Safari says "Apple GPU" on every
+      // Mac, so only the ASTC texture extension (Apple GPUs only) tells them apart.
+      if (v === 'intelr' || v === 'intel' || v === 'amd') { return match('generic intel mac'); }
       var appleSilicon = v === 'apple' || /apple m\d/.test(r) ||
-        (r === 'apple gpu' && v !== 'intelr' && v !== 'intel' && v !== 'amd') ||
+        (r === 'apple gpu' && webgl.astc === true) ||
         (ua.engine === 'gecko' && wg.available);
       if (appleSilicon) { return match('generic apple silicon mac'); }
+      if (r === 'apple gpu' && webgl.astc === false) { return match('generic intel mac'); }
+      return null; // unknown: better no GPU than a wrong one
     }
+    // WebGL blocked or masked, but the WebGPU adapter says NVIDIA: some GeForce card.
+    if (v === 'nvidia' && ua.formFactor === 'desktop' && (!r || webgl.masked)) { return match('generic nvidia gpu'); }
     return null;
   }
 
+  // Known vendor names that contain commas and would break the "ANGLE (vendor, model, …)" split.
+  var COMMA_VENDORS = /^ANGLE \((?:VMware, Inc\.|Samsung Electronics Co\., Ltd\.|Advanced Micro Devices, Inc\.),\s*/i;
+
   function cleanRenderer(s) {
-    s = String(s || '');
+    s = String(s || '').replace(/,? or similar$/i, '');
+    s = s.replace(COMMA_VENDORS, 'ANGLE (V, ');
     var m = s.match(/^ANGLE \(([^,]*),\s*([^,]*?)(?:\s+Direct3D.*|\s+\(0x[0-9a-f]+\).*|,.*)?\)$/i);
-    if (m) { s = m[2]; }
-    s = s.replace(/\s*\((TM|R)\)/gi, '').replace(/, or similar$/i, '').replace(/\s+/g, ' ');
+    if (m) {
+      s = m[2];
+      if (/^(Inc|Ltd|Co|Corp)\.?$/i.test(s)) { s = ''; }
+    }
+    // "ANGLE Vulkan 1.3 (Samsung Xclipse 940 (0x…))" and "ANGLE Metal Renderer: Apple M3"
+    s = s.replace(/^ANGLE Vulkan [\d.]+ \((.*?)(?: \(0x[^)]*\))?\)?$/i, '$1').replace(/^ANGLE Metal Renderer:\s*/i, '');
+    s = s.replace(/\s*\((TM|R)\)/gi, '').replace(/\s+/g, ' ');
     if (/^(webkit webgl|mozilla|generic renderer)$/i.test(s)) { return ''; }
     return s.replace(/^\s+|\s+$/g, '');
   }
 
-  // Guess RAM for Apple devices when the browser hides it, from the matched chip entry.
+  // Guess RAM when the browser hides it, from the matched chip entry (Apple devices, Lunar Lake).
+  // Only an actual identification counts: a Firefox bucket or a low-confidence match names a
+  // representative GPU, whose smallest configuration says nothing about this device.
   function refineMemory(mem, gpu, ua) {
     var fromName = LAC.ramFromRenderer ? LAC.ramFromRenderer(gpu.renderer) : null;
     if (fromName && (mem.source === 'default' || mem.capped)) {
@@ -345,13 +442,20 @@
       return;
     }
     if (mem.source !== 'default' || !gpu.entry) { return; }
-    var opts = gpu.entry.unifiedOptionsGB;
-    if (opts && opts.length) {
-      // The smallest configuration is the safe assumption; the page asks the user to confirm.
-      mem.estimatedGB = opts[0];
-      mem.source = 'device-lookup';
-      mem.confidence = opts.length === 1 ? 'medium' : 'low';
-    }
+    if (gpu.bucketed && !gpu.entry.generic) { return; }
+    if (gpu.confidence !== 'high' && !gpu.entry.generic) { return; }
+    ramFromEntry(mem, gpu.entry);
+  }
+
+  // The first listed configuration is the curated default (the entry-level model of the chip:
+  // 16 GB for a base M-series Mac, 6 GB for an iPhone); the page asks the user to confirm.
+  function ramFromEntry(mem, entry) {
+    var opts = entry && entry.unifiedOptionsGB;
+    if (!opts || !opts.length) { return false; }
+    mem.estimatedGB = opts[0];
+    mem.source = 'device-lookup';
+    mem.confidence = opts.length === 1 ? 'medium' : 'low';
+    return true;
   }
 
   // ---------------------------------------------------------------- overrides
@@ -359,7 +463,8 @@
   function applyOverrides(device, ov) {
     if (!ov) { return device; }
     var notes = device.notes || [];
-    if (typeof ov.ramGB === 'number' && ov.ramGB > 0) {
+    var ramSet = typeof ov.ramGB === 'number' && ov.ramGB > 0;
+    if (ramSet) {
       device.memory.estimatedGB = ov.ramGB;
       device.memory.source = 'user';
       device.memory.confidence = 'high';
@@ -372,10 +477,25 @@
     if (ov.gpuName && LAC.GPUS) {
       for (var i = 0; i < LAC.GPUS.length; i++) {
         if (LAC.GPUS[i].name === ov.gpuName) {
-          device.gpu.entry = LAC.GPUS[i];
-          device.gpu.name = LAC.GPUS[i].name;
+          var entry = LAC.GPUS[i];
+          device.gpu.entry = entry;
+          device.gpu.name = entry.name;
           device.gpu.source = 'user';
           device.gpu.confidence = 'high';
+          device.gpu.hybrid = false;
+          device.gpu.bucketed = false;
+          var mem = device.memory;
+          // RAM that was only guessed (from the platform or from the previously matched chip)
+          // follows the chip the user picked. A value the browser or the renderer name reported
+          // (confidence 'high') and one the user set stay.
+          if (!ramSet && mem && (mem.source === 'device-lookup' || mem.source === 'default') && mem.confidence !== 'high') {
+            if (!ramFromEntry(mem, entry) && mem.source === 'device-lookup') {
+              mem.estimatedGB = platformGuessGB(device.ua || {});
+              mem.source = 'default';
+              mem.confidence = 'low';
+            }
+          }
+          if (device.ua && device.ua.os === 'mac' && device.cpu) { device.cpu.arch = entry.vendor === 'apple' ? 'arm' : 'x86'; }
           break;
         }
       }
@@ -557,22 +677,61 @@
       }
       return;
     }
+    var measuredBw = Math.round(gpuRes.gbs / 0.75);
+    var measuredTflops = U.round((gpuRes.gflops || 0) * 2 / 1000, 1);
+    if (e && e.generic && e.vendor !== 'apple') {
+      // A vendor class (Firefox hides the model): the benchmark ran on this very GPU, so its
+      // bandwidth replaces the placeholder. The conservative VRAM stays until the user picks the card.
+      d.gpu.entry = U.extend({}, e, {
+        name: e.name.replace(/ \(model hidden by the browser\)$/, '') + ' (speed measured)',
+        bandwidthGBs: measuredBw, fp16Tflops: measuredTflops > 0 ? measuredTflops : e.fp16Tflops, measured: true
+      });
+      d.gpu.name = d.gpu.entry.name;
+      return;
+    }
+    if (e && d.gpu.hybrid) {
+      // The benchmark runs on the high-performance adapter. Clearly faster than the integrated GPU
+      // WebGL named means it measured the discrete card.
+      if (measuredBw > 1.5 * (e.bandwidthGBs || 0)) {
+        var vendorName = d.gpu.discreteVendor === 'nvidia' ? 'NVIDIA' : 'AMD';
+        var recent = /40-series|50-series|RX 7000|RX 9000/.test(d.gpu.archHint || '');
+        d.gpu.entry = {
+          match: [], name: (d.gpu.archHint || vendorName + ' graphics card') + ' (measured)', vendor: d.gpu.discreteVendor,
+          kind: 'discrete-laptop', vramGB: recent ? 6 : 4, unifiedOptionsGB: [],
+          bandwidthGBs: measuredBw, fp16Tflops: measuredTflops, year: 0, measured: true
+        };
+        d.gpu.name = d.gpu.entry.name;
+        d.gpu.source = 'webgpu';
+        d.gpu.confidence = 'low';
+      }
+      return;
+    }
     if (e) { return; }
     var mobile = d.ua.formFactor !== 'desktop';
+    // An unknown NVIDIA GPU (or an AMD one faster than any APU) has its own video memory.
+    var vendor = pcVendor(d.gpu.renderer + ' ' + d.gpu.vendorString + ' ' + ((d.webgpu && d.webgpu.info && d.webgpu.info.vendor) || ''));
+    var discrete = !mobile && (vendor === 'nvidia' || (vendor === 'amd' && measuredBw > 150));
     d.gpu.entry = {
-      match: [], name: (d.gpu.name || 'Unrecognised GPU') + ' (measured)', vendor: 'other',
-      kind: mobile ? 'mobile-soc' : 'integrated', vramGB: 0, unifiedOptionsGB: [],
-      bandwidthGBs: Math.round(gpuRes.gbs / 0.75), fp16Tflops: U.round((gpuRes.gflops || 0) * 2 / 1000, 1), year: 0, measured: true
+      match: [], name: (d.gpu.name || 'Unrecognised GPU') + ' (measured)', vendor: vendor || 'other',
+      kind: mobile ? 'mobile-soc' : (discrete ? 'discrete-desktop' : 'integrated'), vramGB: discrete ? 4 : 0, unifiedOptionsGB: [],
+      bandwidthGBs: measuredBw, fp16Tflops: measuredTflops, year: 0, measured: true
     };
     d.gpu.source = 'webgpu';
     d.gpu.confidence = 'low';
-    d.notes.push('Your GPU is not in our table, so its speed comes from a quick in-browser measurement. If it has its own video memory, pick it under "Correct the details".');
+    d.notes.push('Your GPU is not in our table, so its speed comes from a quick in-browser measurement. ' +
+      (discrete ? 'We assumed 4 GB of video memory; pick your card' : 'If it has its own video memory, pick it') + ' under "Correct the details".');
   }
 
   function addNotes(d) {
     if (d.memory.capped) { d.notes.push('Your browser reports at least ' + d.memory.reportedGB + ' GB of RAM but will not report more. If you have more, set it under "Correct the details".'); }
     if (d.memory.source === 'default' || d.memory.source === 'device-lookup') { d.notes.push('Your browser does not report RAM, so we assumed ' + d.memory.estimatedGB + ' GB. Set the real amount under "Correct the details".'); }
-    if (d.gpu.confidence !== 'high') { d.notes.push('We could not pin down your exact GPU. Choosing it under "Correct the details" improves accuracy.'); }
+    if (d.gpu.hybrid) {
+      d.notes.push('This computer seems to have two GPUs: the browser draws on ' + (d.gpu.entry && !d.gpu.entry.measured ? d.gpu.entry.name : 'the built-in one') +
+        ', but apps like Ollama can use the ' + (d.gpu.discreteVendor === 'nvidia' ? 'NVIDIA' : 'AMD') + ' card. Pick that card under "Correct the details".');
+    } else if (d.gpu.bucketed && d.gpu.entry && d.gpu.entry.generic) {
+      d.notes.push('Firefox only reveals the maker of your GPU, not the model. Choosing it under "Correct the details" improves accuracy.');
+    } else if (d.gpu.confidence !== 'high') { d.notes.push('We could not pin down your exact GPU. Choosing it under "Correct the details" improves accuracy.'); }
+    if (d.gpu.virtual) { d.notes.push('The graphics look virtual (a virtual machine or remote desktop), so AI apps may not get real GPU acceleration here.'); }
     if (d.network.saveData) { d.notes.push('Data Saver is on. Models are large downloads (hundreds of MB to many GB).'); }
   }
 
@@ -591,7 +750,8 @@
   }
 
   function osName(ua) {
-    var names = { windows: 'Windows', mac: 'macOS', linux: 'Linux', android: 'Android', ios: 'iOS', ipados: 'iPadOS', chromeos: 'ChromeOS', other: 'an unknown OS' };
+    var names = { windows: 'Windows', mac: 'macOS', linux: 'Linux', android: 'Android', ios: 'iOS', ipados: 'iPadOS', chromeos: 'ChromeOS',
+      kaios: 'KaiOS', harmonyos: 'HarmonyOS', other: 'an unknown OS' };
     return (names[ua.os] || 'an unknown OS') + (ua.osVersion ? ' ' + ua.osVersion : '');
   }
 
@@ -601,5 +761,9 @@
   };
   LAC.detectSync = detectSync;
   LAC.applyOverrides = applyOverrides;
-  LAC.detectInternals = { parseUA: parseUA, cleanRenderer: cleanRenderer, readMemory: readMemory, memoryText: memoryText, osName: osName };
+  LAC.detectInternals = {
+    parseUA: parseUA, applyHints: applyHints, cleanRenderer: cleanRenderer, readMemory: readMemory, platformGuessGB: platformGuessGB,
+    readWebGL: readWebGL, identifyGpu: identifyGpu, refineMemory: refineMemory, adoptMeasuredGpu: adoptMeasuredGpu, addNotes: addNotes,
+    memoryText: memoryText, osName: osName
+  };
 })(window.LAC = window.LAC || {});

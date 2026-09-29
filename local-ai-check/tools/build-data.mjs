@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DIFFUSION, SPEECH, WEBLLM, BROWSER_OTHER, DROP, GPU_EXTRA_MATCH, kindFor } from './curation.mjs';
+import { DIFFUSION, SPEECH, WEBLLM, BROWSER_OTHER, DROP, NOT_CHAT, NEEDS_FORK, GPU_EXTRA_MATCH, kindFor } from './curation.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const research = (name) => {
@@ -73,6 +73,10 @@ for (const cat of catalogs) {
       ollama: r.ollama_tag || '', tier: r.popularity, source: r.source, notes: r.notes,
     };
 
+    // Curated flags read by the headline's "best pick" (only written when they apply).
+    if (NOT_CHAT.some(([re]) => re.test(name))) m.chat = false;
+    if (NEEDS_FORK.some(([re]) => re.test(name))) m.needsFork = true;
+
     const wl = webllmFor(name);
     const other = firstMatch(BROWSER_OTHER, name);
     if (wl) m.browser = { webllm: wl };
@@ -96,6 +100,7 @@ for (const cat of catalogs) {
 // Every curated browser mapping should have found a model.
 for (const [re, base] of WEBLLM) if (!models.some((m) => re.test(m.name))) warn(`WebLLM mapping ${re} (${base}) matched no model`);
 for (const [re] of BROWSER_OTHER) if (!models.some((m) => re.test(m.name))) warn(`browser mapping ${re} matched no model`);
+for (const [re] of [...NOT_CHAT, ...NEEDS_FORK]) if (!models.some((m) => re.test(m.name))) warn(`model flag ${re} matched no model`);
 for (const [re] of DIFFUSION) if (!models.some((m) => re.test(m.name))) warn(`diffusion calibration ${re} matched no model`);
 
 // ------------------------------------------------------------------ GPUs
