@@ -93,7 +93,11 @@ LAC.util = {
   minMemGB: 6,                   // practical minimum RAM/VRAM at smallest sensible precision, 4k ctx
   contextK: 128,
   ollama: 'llama3.1:8b',         // '' if none
-  browser: { webllm: 'Llama-3.1-8B-Instruct-q4f16_1-MLC', vramMB: 5295 } | null,
+  // WebLLM builds per shader precision; pick one with LAC.estimate.webllmBuild(model, shaderF16),
+  // which returns null when only an f16 build exists and the GPU lacks shader-f16.
+  browser: { webllm: { f16: { id, vramMB }, f32: { id, vramMB }, lowResource }, tjs?, demo? } | null,
+  chat: false | undefined,       // captioning/base models: never offered as the best chat pick
+  needsFork: true | undefined,   // needs a special runtime fork: skipped for best picks in the installed-app view
   // diffusion only: reference compute per image (TFLOP) at default steps/resolution
   diffusion: { tflopPerImage: 90, steps: 20, resolution: 1024 } | undefined,
   // speech only: compute per audio second (GFLOP) so RTF can be estimated
@@ -137,7 +141,7 @@ Device = {
         formFactor: 'phone'|'tablet'|'desktop', model: '' },
   cpu: { cores: number|null, arch: 'arm'|'x86'|null, bitness: '64'|'32'|null,
          score: number|null,              // bench: relative single-thread score, 1.0 ≈ 2020 mid laptop
-         memBandwidthGBs: number|null },  // bench: measured JS copy bandwidth (lower bound)
+         memBandwidthGBs: null },  // kept for compatibility; the copy benchmark was removed
   memory: { reportedGB: number|null,      // navigator.deviceMemory as given
             estimatedGB: number,          // best guess used for estimates
             source: 'deviceMemory'|'device-lookup'|'user'|'default',
@@ -169,8 +173,10 @@ sets `source: 'user'` and confidence high.
 ## `LAC.bench`
 
 ```
-LAC.bench.cpu() -> Promise<{ score, memBandwidthGBs, ms }>   // ≤ 1.2 s, yields to UI between chunks
-LAC.bench.gpu() -> Promise<{ gbs, gflops, ms } | null>       // WebGPU only, ≤ 2 s, always destroys buffers/device
+LAC.bench.cpu() -> Promise<{ score, memBandwidthGBs: null, ms } | null>  // ~0.4-0.9 s, tick-aligned ~40 ms chunks, yields between
+                                                              // chunks; null if the clock never advances
+LAC.bench.gpu() -> Promise<{ gbs, gflops, ms } | null>       // WebGPU only, ≤ 4.5 s overall; batches double until ≥ 100 ms;
+                                                              // always destroys buffers/device, including one that arrives late
 ```
 
 ## `LAC.estimate`
@@ -217,7 +223,12 @@ LAC.ui.progress(stepId, status, detail)    // live probe checklist
 LAC.ui.renderDevice(device, budget)        // device summary + correction controls
 LAC.ui.renderResults(device, budget)       // verdict counts, best picks, filterable lists
 LAC.ui.onOverride(fn)                      // fn({ ramGB, gpuName }) when the user corrects detection
+LAC.ui.scanDone()                          // folds the checklist into a one-line summary, shows "Scan again"
+LAC.ui.showRescan(show)
 ```
+
+Page order: title, scan checklist, results (verdict counts, best picks, lists), then the
+device plate with "Correct the details". The search box is built once and never replaced.
 
 ## `main.js`
 
@@ -225,4 +236,5 @@ On DOMContentLoaded (or immediately if already loaded): `LAC.ui.init`, run
 `LAC.detect(LAC.ui.progress)`, then `LAC.estimate.budget`, then render. When the
 user overrides RAM/GPU: save, re-apply, re-budget, re-render (no re-scan). A
 "Scan again" button re-runs everything. Without `Promise`: synchronous fallback
-path using only UA/cores/deviceMemory/WebGL.
+path using only UA/cores/deviceMemory/WebGL. Every path ends with `LAC.ui.scanDone()`.
+Corrections are also kept in memory, so they work when localStorage throws.

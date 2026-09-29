@@ -23,7 +23,7 @@ an optional Google Fonts stylesheet, and it sends nothing anywhere.
 | WebGPU | `navigator.gpu` | Adapter limits, `shader-f16`, software fallback |
 | WebAssembly | `WebAssembly.validate` | SIMD, threads, memory64, relaxed SIMD |
 | Browser storage | `navigator.storage.estimate()` | Limits which models can be cached in the browser |
-| CPU speed | 96×96 matmul micro-benchmark | ≈0.5 s, yields between rounds |
+| CPU speed | 96×96 matmul micro-benchmark | ≈0.4–0.9 s in ~40 ms chunks, yields between chunks |
 | GPU speed | WebGPU copy + FMA compute shaders | ≈1 s, only with a hardware adapter; refines unknown or hidden chips |
 
 When a value is hidden or uncertain, the page says so (“detected”, “likely”, “guess”) and

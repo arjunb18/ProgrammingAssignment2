@@ -8,16 +8,18 @@ import vm from 'node:vm';
 const src = join(dirname(fileURLToPath(import.meta.url)), '..', 'src');
 
 // Loads util.js + bench.js with performance.now() quantised to `tick` ms (0 = native).
-// With `jitter`, bucket edges move randomly like Firefox's reduceTimerPrecision jitter.
+// With `jitter`, each bucket edge moves by a random amount like Firefox's reduceTimerPrecision
+// jitter: the clock still only reports multiples of `tick`, but each step from one multiple to the
+// next happens at a random point of its bucket (fixed per bucket, so the clock never goes back).
 function load(tick, jitter, extra) {
-  let last = 0;
+  const edge = new Map();
+  const edgeOf = (k) => { if (!edge.has(k)) edge.set(k, Math.random() * tick); return edge.get(k); };
   const now = () => {
     const t = performance.now();
     if (!tick) return t;
-    let q = Math.floor(t / tick) * tick;
-    if (jitter) q += Math.floor(Math.random() * 2) * tick * 0.5;
-    last = Math.max(last, q); // stays monotonic
-    return last;
+    const k = Math.floor(t / tick);
+    if (!jitter) return k * tick;
+    return (t - k * tick >= edgeOf(k) ? k : k - 1) * tick;
   };
   const ctx = vm.createContext(Object.assign({ window: {}, console, setTimeout, clearTimeout, Promise, Math, JSON, Date,
     performance: { now }, Float32Array, Float64Array, isFinite }, extra || {}));
