@@ -2,7 +2,7 @@
 import { loadLAC } from './load.mjs';
 
 const L = loadLAC(['util.js', 'data/models.js', 'data/gpus.js', 'estimate.js']);
-const gpu = (name) => L.GPUS.find((g) => g.name === name) || (() => { throw new Error('no GPU ' + name); })();
+const gpu = (name) => L.GPUS.find((g) => g.name === name) || L.GPUS.find((g) => g.name.startsWith(name + ' (')) || (() => { throw new Error('no GPU ' + name); })();
 const model = (re) => L.MODELS.find((m) => re.test(m.name)) || (() => { throw new Error('no model ' + re); })();
 
 function device({ gpuName, ram, form = 'desktop', os = 'windows', cores = 8, score = 1.5, webgpu = true, f16 = true }) {
@@ -22,7 +22,7 @@ const ANCHORS = [
   ['RTX 4090 + Llama 3.1 8B (measured ~130-150 tok/s)', { gpuName: 'NVIDIA GeForce RTX 4090', ram: 64 }, /^Llama 3\.1 8B/, 'well', [100, 180]],
   ['M2 base 16 GB + Llama 3.1 8B (measured ~12-15 tok/s)', { gpuName: 'Apple M2', ram: 16, os: 'mac' }, /^Llama 3\.1 8B/, 'well', [10, 18]],
   ['M4 Max 128 GB + Llama 3.3 70B (measured ~8-10 tok/s)', { gpuName: 'Apple M4 Max (40-core GPU; 32-core bin 410 GB/s)', ram: 128, os: 'mac' }, /^Llama 3\.3 70B/, 'slow', [6, 12]],
-  ['iPhone 16 Pro + Llama 3.2 3B (measured ~14 tok/s)', { gpuName: 'Apple A18 Pro (iPhone 16 Pro / Pro Max)', ram: 8, form: 'phone', os: 'ios', cores: 6 }, /^Llama 3\.2 3B/, 'well', [10, 25]],
+  ['iPhone 16 Pro + Llama 3.2 3B (measured ~14 tok/s)', { gpuName: 'Apple A18 Pro', ram: 8, form: 'phone', os: 'ios', cores: 6 }, /^Llama 3\.2 3B/, 'well', [10, 25]],
   ['RTX 4090 + gpt-oss-120b (MoE, needs RAM offload)', { gpuName: 'NVIDIA GeForce RTX 4090', ram: 64 }, /^gpt-oss-120b/, 'well', [10, 60]],
   ['8 GB laptop, no GPU + Llama 3.1 70B', { ram: 8, cores: 4, score: 0.8 }, /^Llama 3\.3 70B/, 'no', null],
   ['8 GB laptop, no GPU + Qwen3 1.7B', { ram: 8, cores: 4, score: 0.8 }, /^Qwen3 1\.7B/, 'well', [10, 60]],

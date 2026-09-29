@@ -1,0 +1,3784 @@
+{
+ "gpus": [
+  {
+   "match": [
+    "h200"
+   ],
+   "name": "NVIDIA H200 141GB",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 141,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 4800,
+   "fp16_tflops": 134,
+   "year": 2024
+  },
+  {
+   "match": [
+    "h100 nvl"
+   ],
+   "name": "NVIDIA H100 NVL 94GB",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 94,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 3900,
+   "fp16_tflops": 120,
+   "year": 2023
+  },
+  {
+   "match": [
+    "h100 pcie",
+    "h100-pcie"
+   ],
+   "name": "NVIDIA H100 PCIe 80GB",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 80,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 2000,
+   "fp16_tflops": 102,
+   "year": 2022
+  },
+  {
+   "match": [
+    "h100"
+   ],
+   "name": "NVIDIA H100 SXM 80GB",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 80,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 3350,
+   "fp16_tflops": 134,
+   "year": 2022
+  },
+  {
+   "match": [
+    "a100-sxm4-80gb",
+    "a100 80gb",
+    "a100-pcie-80gb",
+    "a100-sxm-80gb"
+   ],
+   "name": "NVIDIA A100 80GB",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 80,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 2039,
+   "fp16_tflops": 78,
+   "year": 2020
+  },
+  {
+   "match": [
+    "nvidia a100",
+    "a100-sxm4",
+    "a100-pcie"
+   ],
+   "name": "NVIDIA A100 40GB",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 40,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 1555,
+   "fp16_tflops": 78,
+   "year": 2020
+  },
+  {
+   "match": [
+    "l40s"
+   ],
+   "name": "NVIDIA L40S",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 48,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 864,
+   "fp16_tflops": 91.6,
+   "year": 2023
+  },
+  {
+   "match": [
+    "nvidia l40"
+   ],
+   "name": "NVIDIA L40",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 48,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 864,
+   "fp16_tflops": 90.5,
+   "year": 2022
+  },
+  {
+   "match": [
+    "nvidia l4"
+   ],
+   "name": "NVIDIA L4",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 300,
+   "fp16_tflops": 30.3,
+   "year": 2023
+  },
+  {
+   "match": [
+    "a10g"
+   ],
+   "name": "NVIDIA A10G",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 600,
+   "fp16_tflops": 31.2,
+   "year": 2021
+  },
+  {
+   "match": [
+    "nvidia a10"
+   ],
+   "name": "NVIDIA A10",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 600,
+   "fp16_tflops": 31.2,
+   "year": 2021
+  },
+  {
+   "match": [
+    "tesla t4",
+    "nvidia t4"
+   ],
+   "name": "NVIDIA T4",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 320,
+   "fp16_tflops": 16.2,
+   "year": 2018
+  },
+  {
+   "match": [
+    "v100"
+   ],
+   "name": "NVIDIA Tesla V100 16GB",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 900,
+   "fp16_tflops": 31.4,
+   "year": 2017
+  },
+  {
+   "match": [
+    "tesla p100"
+   ],
+   "name": "NVIDIA Tesla P100 16GB",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 732,
+   "fp16_tflops": 19.1,
+   "year": 2016
+  },
+  {
+   "match": [
+    "tesla p40"
+   ],
+   "name": "NVIDIA Tesla P40 24GB",
+   "vendor": "nvidia",
+   "kind": "datacenter",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 347,
+   "fp16_tflops": 0.18,
+   "year": 2016
+  },
+  {
+   "match": [
+    "gb10",
+    "dgx spark"
+   ],
+   "name": "NVIDIA GB10 (DGX Spark)",
+   "vendor": "nvidia",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    128
+   ],
+   "bandwidth_gbs": 273,
+   "fp16_tflops": 31,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx pro 6000"
+   ],
+   "name": "NVIDIA RTX PRO 6000 Blackwell",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 96,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 1792,
+   "fp16_tflops": 126,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx pro 5000"
+   ],
+   "name": "NVIDIA RTX PRO 5000 Blackwell (48GB; 72GB variant exists)",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 48,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 1344,
+   "fp16_tflops": 74,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx pro 4000"
+   ],
+   "name": "NVIDIA RTX PRO 4000 Blackwell",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 672,
+   "fp16_tflops": 47,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 6000 ada"
+   ],
+   "name": "NVIDIA RTX 6000 Ada",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 48,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 960,
+   "fp16_tflops": 91,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rtx 5000 ada"
+   ],
+   "name": "NVIDIA RTX 5000 Ada",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 32,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 576,
+   "fp16_tflops": 65,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 4000 ada"
+   ],
+   "name": "NVIDIA RTX 4000 Ada",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 20,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 360,
+   "fp16_tflops": 26.7,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 2000 ada"
+   ],
+   "name": "NVIDIA RTX 2000 Ada",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 224,
+   "fp16_tflops": 12,
+   "year": 2024
+  },
+  {
+   "match": [
+    "rtx a6000"
+   ],
+   "name": "NVIDIA RTX A6000",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 48,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 768,
+   "fp16_tflops": 38.7,
+   "year": 2020
+  },
+  {
+   "match": [
+    "rtx a5000"
+   ],
+   "name": "NVIDIA RTX A5000",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 768,
+   "fp16_tflops": 27.8,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rtx a4000"
+   ],
+   "name": "NVIDIA RTX A4000",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 19.2,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rtx a2000"
+   ],
+   "name": "NVIDIA RTX A2000 12GB",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 288,
+   "fp16_tflops": 8,
+   "year": 2021
+  },
+  {
+   "match": [
+    "titan rtx"
+   ],
+   "name": "NVIDIA TITAN RTX",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 672,
+   "fp16_tflops": 32.6,
+   "year": 2018
+  },
+  {
+   "match": [
+    "rtx 5090 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 5090 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 896,
+   "fp16_tflops": 31.8,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5090"
+   ],
+   "name": "NVIDIA GeForce RTX 5090",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 32,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 1792,
+   "fp16_tflops": 104.8,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5080 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 5080 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 896,
+   "fp16_tflops": 24.5,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5080"
+   ],
+   "name": "NVIDIA GeForce RTX 5080",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 960,
+   "fp16_tflops": 56.3,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5070 ti laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 5070 Ti Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 672,
+   "fp16_tflops": 22,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5070 ti"
+   ],
+   "name": "NVIDIA GeForce RTX 5070 Ti",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 896,
+   "fp16_tflops": 43.9,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5070 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 5070 Laptop (8GB; 12GB variant from 2026)",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 384,
+   "fp16_tflops": 16,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5070"
+   ],
+   "name": "NVIDIA GeForce RTX 5070",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 672,
+   "fp16_tflops": 30.9,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5060 ti"
+   ],
+   "name": "NVIDIA GeForce RTX 5060 Ti (16GB; 8GB variant exists)",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 23.7,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5060 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 5060 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 384,
+   "fp16_tflops": 14.5,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5060"
+   ],
+   "name": "NVIDIA GeForce RTX 5060",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 19.2,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5050 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 5050 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 384,
+   "fp16_tflops": 10,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 5050"
+   ],
+   "name": "NVIDIA GeForce RTX 5050",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 320,
+   "fp16_tflops": 13.2,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rtx 4090 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 4090 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 576,
+   "fp16_tflops": 32.9,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 4090"
+   ],
+   "name": "NVIDIA GeForce RTX 4090",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 1008,
+   "fp16_tflops": 82.6,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rtx 4080 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 4080 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 432,
+   "fp16_tflops": 24.7,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 4080 super"
+   ],
+   "name": "NVIDIA GeForce RTX 4080 SUPER",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 736,
+   "fp16_tflops": 52.2,
+   "year": 2024
+  },
+  {
+   "match": [
+    "rtx 4080"
+   ],
+   "name": "NVIDIA GeForce RTX 4080",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 717,
+   "fp16_tflops": 48.7,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rtx 4070 ti super"
+   ],
+   "name": "NVIDIA GeForce RTX 4070 Ti SUPER",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 672,
+   "fp16_tflops": 44.1,
+   "year": 2024
+  },
+  {
+   "match": [
+    "rtx 4070 ti"
+   ],
+   "name": "NVIDIA GeForce RTX 4070 Ti",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 504,
+   "fp16_tflops": 40.1,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 4070 super"
+   ],
+   "name": "NVIDIA GeForce RTX 4070 SUPER",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 504,
+   "fp16_tflops": 35.5,
+   "year": 2024
+  },
+  {
+   "match": [
+    "rtx 4070 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 4070 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 256,
+   "fp16_tflops": 15.6,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 4070"
+   ],
+   "name": "NVIDIA GeForce RTX 4070",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 504,
+   "fp16_tflops": 29.1,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 4060 ti"
+   ],
+   "name": "NVIDIA GeForce RTX 4060 Ti (8GB; 16GB variant exists)",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 288,
+   "fp16_tflops": 22.1,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 4060 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 4060 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 256,
+   "fp16_tflops": 11.6,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 4060"
+   ],
+   "name": "NVIDIA GeForce RTX 4060",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 272,
+   "fp16_tflops": 15.1,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 4050"
+   ],
+   "name": "NVIDIA GeForce RTX 4050 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 192,
+   "fp16_tflops": 9,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 3080 ti laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 3080 Ti Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 512,
+   "fp16_tflops": 23.6,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rtx 3080 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 3080 Laptop (8GB; 16GB variant exists)",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 19,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rtx 3090 ti"
+   ],
+   "name": "NVIDIA GeForce RTX 3090 Ti",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 1008,
+   "fp16_tflops": 40,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rtx 3090"
+   ],
+   "name": "NVIDIA GeForce RTX 3090",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 936,
+   "fp16_tflops": 35.6,
+   "year": 2020
+  },
+  {
+   "match": [
+    "rtx 3080 ti"
+   ],
+   "name": "NVIDIA GeForce RTX 3080 Ti",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 912,
+   "fp16_tflops": 34.1,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rtx 3080"
+   ],
+   "name": "NVIDIA GeForce RTX 3080 (10GB; 12GB variant exists)",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 10,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 760,
+   "fp16_tflops": 29.8,
+   "year": 2020
+  },
+  {
+   "match": [
+    "rtx 3070 ti laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 3070 Ti Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 17,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rtx 3070 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 3070 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 16,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rtx 3070 ti"
+   ],
+   "name": "NVIDIA GeForce RTX 3070 Ti",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 608,
+   "fp16_tflops": 21.7,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rtx 3070"
+   ],
+   "name": "NVIDIA GeForce RTX 3070",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 20.3,
+   "year": 2020
+  },
+  {
+   "match": [
+    "rtx 3060 ti"
+   ],
+   "name": "NVIDIA GeForce RTX 3060 Ti",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 16.2,
+   "year": 2020
+  },
+  {
+   "match": [
+    "rtx 3060 laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 3060 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 336,
+   "fp16_tflops": 10.9,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rtx 3060"
+   ],
+   "name": "NVIDIA GeForce RTX 3060 12GB (8GB variant exists)",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 360,
+   "fp16_tflops": 12.7,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rtx 3050 ti"
+   ],
+   "name": "NVIDIA GeForce RTX 3050 Ti Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 4,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 192,
+   "fp16_tflops": 7.6,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rtx 3050 6gb laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 3050 6GB Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 168,
+   "fp16_tflops": 7,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rtx 3050 laptop",
+    "rtx 3050 4gb laptop",
+    "rtx 3050 a laptop"
+   ],
+   "name": "NVIDIA GeForce RTX 3050 Laptop",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 4,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 192,
+   "fp16_tflops": 7,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rtx 3050 6gb"
+   ],
+   "name": "NVIDIA GeForce RTX 3050 6GB (desktop)",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 168,
+   "fp16_tflops": 6.8,
+   "year": 2024
+  },
+  {
+   "match": [
+    "rtx 3050"
+   ],
+   "name": "NVIDIA GeForce RTX 3050 8GB",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 224,
+   "fp16_tflops": 9.1,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rtx 2050"
+   ],
+   "name": "NVIDIA GeForce RTX 2050 (laptop)",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 4,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 112,
+   "fp16_tflops": 6,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rtx 2080 with max-q",
+    "rtx 2080 super with max-q"
+   ],
+   "name": "NVIDIA GeForce RTX 2080 Max-Q (laptop)",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 384,
+   "fp16_tflops": 13,
+   "year": 2019
+  },
+  {
+   "match": [
+    "rtx 2070 with max-q",
+    "rtx 2070 super with max-q"
+   ],
+   "name": "NVIDIA GeForce RTX 2070 Max-Q (laptop)",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 384,
+   "fp16_tflops": 11,
+   "year": 2019
+  },
+  {
+   "match": [
+    "rtx 2060 with max-q"
+   ],
+   "name": "NVIDIA GeForce RTX 2060 Max-Q (laptop)",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 264,
+   "fp16_tflops": 9,
+   "year": 2020
+  },
+  {
+   "match": [
+    "rtx 2080 ti"
+   ],
+   "name": "NVIDIA GeForce RTX 2080 Ti",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 11,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 616,
+   "fp16_tflops": 26.9,
+   "year": 2018
+  },
+  {
+   "match": [
+    "rtx 2080 super"
+   ],
+   "name": "NVIDIA GeForce RTX 2080 SUPER",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 496,
+   "fp16_tflops": 22.3,
+   "year": 2019
+  },
+  {
+   "match": [
+    "rtx 2080"
+   ],
+   "name": "NVIDIA GeForce RTX 2080",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 20.1,
+   "year": 2018
+  },
+  {
+   "match": [
+    "rtx 2070 super"
+   ],
+   "name": "NVIDIA GeForce RTX 2070 SUPER",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 18.1,
+   "year": 2019
+  },
+  {
+   "match": [
+    "rtx 2070"
+   ],
+   "name": "NVIDIA GeForce RTX 2070",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 15,
+   "year": 2018
+  },
+  {
+   "match": [
+    "rtx 2060 super"
+   ],
+   "name": "NVIDIA GeForce RTX 2060 SUPER",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 14.4,
+   "year": 2019
+  },
+  {
+   "match": [
+    "rtx 2060"
+   ],
+   "name": "NVIDIA GeForce RTX 2060 (6GB; 12GB variant exists)",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 336,
+   "fp16_tflops": 12.9,
+   "year": 2019
+  },
+  {
+   "match": [
+    "gtx 1660 super"
+   ],
+   "name": "NVIDIA GeForce GTX 1660 SUPER",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 336,
+   "fp16_tflops": 10,
+   "year": 2019
+  },
+  {
+   "match": [
+    "gtx 1660 ti"
+   ],
+   "name": "NVIDIA GeForce GTX 1660 Ti",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 288,
+   "fp16_tflops": 10.9,
+   "year": 2019
+  },
+  {
+   "match": [
+    "gtx 1660"
+   ],
+   "name": "NVIDIA GeForce GTX 1660",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 192,
+   "fp16_tflops": 10,
+   "year": 2019
+  },
+  {
+   "match": [
+    "gtx 1650 ti"
+   ],
+   "name": "NVIDIA GeForce GTX 1650 Ti (laptop)",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 4,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 192,
+   "fp16_tflops": 6.2,
+   "year": 2020
+  },
+  {
+   "match": [
+    "gtx 1650 super"
+   ],
+   "name": "NVIDIA GeForce GTX 1650 SUPER",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 4,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 192,
+   "fp16_tflops": 8.8,
+   "year": 2019
+  },
+  {
+   "match": [
+    "gtx 1650"
+   ],
+   "name": "NVIDIA GeForce GTX 1650",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 4,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 128,
+   "fp16_tflops": 6,
+   "year": 2019
+  },
+  {
+   "match": [
+    "gtx 1080 ti"
+   ],
+   "name": "NVIDIA GeForce GTX 1080 Ti",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 11,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 484,
+   "fp16_tflops": 0.18,
+   "year": 2017
+  },
+  {
+   "match": [
+    "gtx 1080"
+   ],
+   "name": "NVIDIA GeForce GTX 1080",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 320,
+   "fp16_tflops": 0.14,
+   "year": 2016
+  },
+  {
+   "match": [
+    "gtx 1070 ti"
+   ],
+   "name": "NVIDIA GeForce GTX 1070 Ti",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 256,
+   "fp16_tflops": 0.13,
+   "year": 2017
+  },
+  {
+   "match": [
+    "gtx 1070"
+   ],
+   "name": "NVIDIA GeForce GTX 1070",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 256,
+   "fp16_tflops": 0.1,
+   "year": 2016
+  },
+  {
+   "match": [
+    "gtx 1060"
+   ],
+   "name": "NVIDIA GeForce GTX 1060 6GB (3GB variant exists)",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 192,
+   "fp16_tflops": 0.07,
+   "year": 2016
+  },
+  {
+   "match": [
+    "gtx 1050 ti"
+   ],
+   "name": "NVIDIA GeForce GTX 1050 Ti",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 4,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 112,
+   "fp16_tflops": 0.03,
+   "year": 2016
+  },
+  {
+   "match": [
+    "gtx 1050"
+   ],
+   "name": "NVIDIA GeForce GTX 1050",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 2,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 112,
+   "fp16_tflops": 0.03,
+   "year": 2016
+  },
+  {
+   "match": [
+    "gt 1030"
+   ],
+   "name": "NVIDIA GeForce GT 1030",
+   "vendor": "nvidia",
+   "kind": "discrete-desktop",
+   "vram_gb": 2,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 48,
+   "fp16_tflops": 0.02,
+   "year": 2017
+  },
+  {
+   "match": [
+    "mx570",
+    "mx550"
+   ],
+   "name": "NVIDIA GeForce MX550/MX570 (laptop)",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 2,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 96,
+   "fp16_tflops": 5.4,
+   "year": 2022
+  },
+  {
+   "match": [
+    "mx450"
+   ],
+   "name": "NVIDIA GeForce MX450 (laptop)",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 2,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 80,
+   "fp16_tflops": 3.6,
+   "year": 2020
+  },
+  {
+   "match": [
+    "mx350",
+    "mx330",
+    "mx250",
+    "mx230",
+    "mx150",
+    "mx130"
+   ],
+   "name": "NVIDIA GeForce MX130-MX350 (laptop, Maxwell/Pascal)",
+   "vendor": "nvidia",
+   "kind": "discrete-laptop",
+   "vram_gb": 2,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 48,
+   "fp16_tflops": 0.02,
+   "year": 2019
+  },
+  {
+   "match": [
+    "mi300x"
+   ],
+   "name": "AMD Instinct MI300X",
+   "vendor": "amd",
+   "kind": "datacenter",
+   "vram_gb": 192,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 5300,
+   "fp16_tflops": 163,
+   "year": 2023
+  },
+  {
+   "match": [
+    "mi60",
+    "mi50"
+   ],
+   "name": "AMD Instinct MI50/MI60 32GB",
+   "vendor": "amd",
+   "kind": "datacenter",
+   "vram_gb": 32,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 1024,
+   "fp16_tflops": 26.5,
+   "year": 2018
+  },
+  {
+   "match": [
+    "radeon vii"
+   ],
+   "name": "AMD Radeon VII",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 1024,
+   "fp16_tflops": 27.7,
+   "year": 2019
+  },
+  {
+   "match": [
+    "rx vega"
+   ],
+   "name": "AMD Radeon RX Vega 56/64",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 484,
+   "fp16_tflops": 25.3,
+   "year": 2017
+  },
+  {
+   "match": [
+    "r9700"
+   ],
+   "name": "AMD Radeon AI PRO R9700",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 32,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 640,
+   "fp16_tflops": 95.7,
+   "year": 2025
+  },
+  {
+   "match": [
+    "w7900"
+   ],
+   "name": "AMD Radeon PRO W7900",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 48,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 864,
+   "fp16_tflops": 122,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rx 9070 xt"
+   ],
+   "name": "AMD Radeon RX 9070 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 644,
+   "fp16_tflops": 97,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rx 9070 gre"
+   ],
+   "name": "AMD Radeon RX 9070 GRE",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 432,
+   "fp16_tflops": 68.6,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rx 9070"
+   ],
+   "name": "AMD Radeon RX 9070",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 644,
+   "fp16_tflops": 72,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rx 9060 xt"
+   ],
+   "name": "AMD Radeon RX 9060 XT (16GB; 8GB variant exists)",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 322,
+   "fp16_tflops": 51,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rx 9060"
+   ],
+   "name": "AMD Radeon RX 9060 (OEM)",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 288,
+   "fp16_tflops": 37,
+   "year": 2025
+  },
+  {
+   "match": [
+    "rx 7900 xtx"
+   ],
+   "name": "AMD Radeon RX 7900 XTX",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 960,
+   "fp16_tflops": 123,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rx 7900m"
+   ],
+   "name": "AMD Radeon RX 7900M (laptop)",
+   "vendor": "amd",
+   "kind": "discrete-laptop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 576,
+   "fp16_tflops": 77,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rx 7900 xt"
+   ],
+   "name": "AMD Radeon RX 7900 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 20,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 800,
+   "fp16_tflops": 103,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rx 7900 gre"
+   ],
+   "name": "AMD Radeon RX 7900 GRE",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 576,
+   "fp16_tflops": 92,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rx 7800 xt"
+   ],
+   "name": "AMD Radeon RX 7800 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 624,
+   "fp16_tflops": 74,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rx 7700 xt"
+   ],
+   "name": "AMD Radeon RX 7700 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 432,
+   "fp16_tflops": 70,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rx 7600m xt",
+    "rx 7600m"
+   ],
+   "name": "AMD Radeon RX 7600M / 7600M XT (laptop)",
+   "vendor": "amd",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 288,
+   "fp16_tflops": 38,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rx 7600s",
+    "rx 7700s"
+   ],
+   "name": "AMD Radeon RX 7600S / 7700S (laptop)",
+   "vendor": "amd",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 256,
+   "fp16_tflops": 40,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rx 7600 xt"
+   ],
+   "name": "AMD Radeon RX 7600 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 288,
+   "fp16_tflops": 45,
+   "year": 2024
+  },
+  {
+   "match": [
+    "rx 7600"
+   ],
+   "name": "AMD Radeon RX 7600",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 288,
+   "fp16_tflops": 43.5,
+   "year": 2023
+  },
+  {
+   "match": [
+    "rx 6950 xt"
+   ],
+   "name": "AMD Radeon RX 6950 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 576,
+   "fp16_tflops": 47.3,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rx 6900 xt"
+   ],
+   "name": "AMD Radeon RX 6900 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 512,
+   "fp16_tflops": 46,
+   "year": 2020
+  },
+  {
+   "match": [
+    "rx 6800m",
+    "rx 6850m"
+   ],
+   "name": "AMD Radeon RX 6800M / 6850M XT (laptop)",
+   "vendor": "amd",
+   "kind": "discrete-laptop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 384,
+   "fp16_tflops": 23.6,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rx 6800 xt"
+   ],
+   "name": "AMD Radeon RX 6800 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 512,
+   "fp16_tflops": 41.5,
+   "year": 2020
+  },
+  {
+   "match": [
+    "rx 6800"
+   ],
+   "name": "AMD Radeon RX 6800",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 512,
+   "fp16_tflops": 32.3,
+   "year": 2020
+  },
+  {
+   "match": [
+    "rx 6750 xt"
+   ],
+   "name": "AMD Radeon RX 6750 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 432,
+   "fp16_tflops": 26.6,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rx 6700m"
+   ],
+   "name": "AMD Radeon RX 6700M (laptop)",
+   "vendor": "amd",
+   "kind": "discrete-laptop",
+   "vram_gb": 10,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 320,
+   "fp16_tflops": 21,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rx 6700 xt"
+   ],
+   "name": "AMD Radeon RX 6700 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 384,
+   "fp16_tflops": 26.4,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rx 6700"
+   ],
+   "name": "AMD Radeon RX 6700",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 10,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 320,
+   "fp16_tflops": 22.6,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rx 6650 xt"
+   ],
+   "name": "AMD Radeon RX 6650 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 280,
+   "fp16_tflops": 21.1,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rx 6600m",
+    "rx 6650m"
+   ],
+   "name": "AMD Radeon RX 6600M / 6650M (laptop)",
+   "vendor": "amd",
+   "kind": "discrete-laptop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 224,
+   "fp16_tflops": 17.6,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rx 6600 xt"
+   ],
+   "name": "AMD Radeon RX 6600 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 256,
+   "fp16_tflops": 21.2,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rx 6600"
+   ],
+   "name": "AMD Radeon RX 6600",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 224,
+   "fp16_tflops": 17.9,
+   "year": 2021
+  },
+  {
+   "match": [
+    "rx 6500 xt"
+   ],
+   "name": "AMD Radeon RX 6500 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 4,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 144,
+   "fp16_tflops": 11.5,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rx 6400"
+   ],
+   "name": "AMD Radeon RX 6400",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 4,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 128,
+   "fp16_tflops": 7.1,
+   "year": 2022
+  },
+  {
+   "match": [
+    "rx 5700 xt"
+   ],
+   "name": "AMD Radeon RX 5700 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 19.5,
+   "year": 2019
+  },
+  {
+   "match": [
+    "rx 5700"
+   ],
+   "name": "AMD Radeon RX 5700",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 448,
+   "fp16_tflops": 15.9,
+   "year": 2019
+  },
+  {
+   "match": [
+    "rx 5600 xt"
+   ],
+   "name": "AMD Radeon RX 5600 XT",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 288,
+   "fp16_tflops": 14.4,
+   "year": 2020
+  },
+  {
+   "match": [
+    "rx 5500 xt"
+   ],
+   "name": "AMD Radeon RX 5500 XT (8GB; 4GB variant exists)",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 224,
+   "fp16_tflops": 10.4,
+   "year": 2019
+  },
+  {
+   "match": [
+    "rx 590",
+    "rx 580",
+    "rx 570"
+   ],
+   "name": "AMD Radeon RX 570/580/590 (Polaris)",
+   "vendor": "amd",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 256,
+   "fp16_tflops": 6.2,
+   "year": 2017
+  },
+  {
+   "match": [
+    "8060s"
+   ],
+   "name": "AMD Radeon 8060S (Ryzen AI Max+ 395, Strix Halo)",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    32,
+    64,
+    128
+   ],
+   "bandwidth_gbs": 256,
+   "fp16_tflops": 59,
+   "year": 2025
+  },
+  {
+   "match": [
+    "8050s"
+   ],
+   "name": "AMD Radeon 8050S (Ryzen AI Max, Strix Halo)",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    32,
+    64,
+    128
+   ],
+   "bandwidth_gbs": 256,
+   "fp16_tflops": 47,
+   "year": 2025
+  },
+  {
+   "match": [
+    "890m"
+   ],
+   "name": "AMD Radeon 890M (Strix Point)",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    24,
+    32,
+    64
+   ],
+   "bandwidth_gbs": 120,
+   "fp16_tflops": 23.8,
+   "year": 2024
+  },
+  {
+   "match": [
+    "880m"
+   ],
+   "name": "AMD Radeon 880M (Strix Point)",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    24,
+    32
+   ],
+   "bandwidth_gbs": 120,
+   "fp16_tflops": 17.8,
+   "year": 2024
+  },
+  {
+   "match": [
+    "860m"
+   ],
+   "name": "AMD Radeon 860M (Krackan Point)",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    24,
+    32
+   ],
+   "bandwidth_gbs": 120,
+   "fp16_tflops": 12.3,
+   "year": 2025
+  },
+  {
+   "match": [
+    "840m"
+   ],
+   "name": "AMD Radeon 840M (Krackan Point)",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    16,
+    32
+   ],
+   "bandwidth_gbs": 90,
+   "fp16_tflops": 5.9,
+   "year": 2025
+  },
+  {
+   "match": [
+    "780m"
+   ],
+   "name": "AMD Radeon 780M (Phoenix/Hawk Point)",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32,
+    64
+   ],
+   "bandwidth_gbs": 90,
+   "fp16_tflops": 16.6,
+   "year": 2023
+  },
+  {
+   "match": [
+    "760m"
+   ],
+   "name": "AMD Radeon 760M",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 90,
+   "fp16_tflops": 10.6,
+   "year": 2023
+  },
+  {
+   "match": [
+    "740m"
+   ],
+   "name": "AMD Radeon 740M",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    16,
+    32
+   ],
+   "bandwidth_gbs": 90,
+   "fp16_tflops": 5.1,
+   "year": 2023
+  },
+  {
+   "match": [
+    "680m"
+   ],
+   "name": "AMD Radeon 680M (Rembrandt)",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 90,
+   "fp16_tflops": 7.4,
+   "year": 2022
+  },
+  {
+   "match": [
+    "660m"
+   ],
+   "name": "AMD Radeon 660M",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    16,
+    32
+   ],
+   "bandwidth_gbs": 77,
+   "fp16_tflops": 2.9,
+   "year": 2022
+  },
+  {
+   "match": [
+    "radeon(tm) graphics",
+    "radeon graphics",
+    "radeon vega",
+    "vega 8",
+    "vega 7"
+   ],
+   "name": "AMD Radeon Graphics (generic Ryzen APU)",
+   "vendor": "amd",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    16,
+    32
+   ],
+   "bandwidth_gbs": 51,
+   "fp16_tflops": 3.6,
+   "year": 2020
+  },
+  {
+   "match": [
+    "arc(tm) pro b70",
+    "arc pro b70"
+   ],
+   "name": "Intel Arc Pro B70 32GB",
+   "vendor": "intel",
+   "kind": "discrete-desktop",
+   "vram_gb": 32,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 608,
+   "fp16_tflops": 45.8,
+   "year": 2026
+  },
+  {
+   "match": [
+    "arc(tm) pro b65",
+    "arc pro b65"
+   ],
+   "name": "Intel Arc Pro B65 32GB",
+   "vendor": "intel",
+   "kind": "discrete-desktop",
+   "vram_gb": 32,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 608,
+   "fp16_tflops": 24.6,
+   "year": 2026
+  },
+  {
+   "match": [
+    "arc(tm) pro b60",
+    "arc pro b60"
+   ],
+   "name": "Intel Arc Pro B60",
+   "vendor": "intel",
+   "kind": "discrete-desktop",
+   "vram_gb": 24,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 456,
+   "fp16_tflops": 24.5,
+   "year": 2025
+  },
+  {
+   "match": [
+    "arc(tm) pro b50",
+    "arc pro b50"
+   ],
+   "name": "Intel Arc Pro B50",
+   "vendor": "intel",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 224,
+   "fp16_tflops": 21,
+   "year": 2025
+  },
+  {
+   "match": [
+    "b580"
+   ],
+   "name": "Intel Arc B580",
+   "vendor": "intel",
+   "kind": "discrete-desktop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 456,
+   "fp16_tflops": 27.4,
+   "year": 2024
+  },
+  {
+   "match": [
+    "b570"
+   ],
+   "name": "Intel Arc B570",
+   "vendor": "intel",
+   "kind": "discrete-desktop",
+   "vram_gb": 10,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 380,
+   "fp16_tflops": 23,
+   "year": 2025
+  },
+  {
+   "match": [
+    "b390"
+   ],
+   "name": "Intel Arc B390 (Panther Lake, integrated)",
+   "vendor": "intel",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32,
+    64,
+    96
+   ],
+   "bandwidth_gbs": 153,
+   "fp16_tflops": 15.4,
+   "year": 2026
+  },
+  {
+   "match": [
+    "b370"
+   ],
+   "name": "Intel Arc B370 (Panther Lake, integrated)",
+   "vendor": "intel",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 153,
+   "fp16_tflops": 12,
+   "year": 2026
+  },
+  {
+   "match": [
+    "a770m"
+   ],
+   "name": "Intel Arc A770M (laptop)",
+   "vendor": "intel",
+   "kind": "discrete-laptop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 512,
+   "fp16_tflops": 26.8,
+   "year": 2022
+  },
+  {
+   "match": [
+    "a730m"
+   ],
+   "name": "Intel Arc A730M (laptop)",
+   "vendor": "intel",
+   "kind": "discrete-laptop",
+   "vram_gb": 12,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 336,
+   "fp16_tflops": 18,
+   "year": 2022
+  },
+  {
+   "match": [
+    "a370m",
+    "a350m"
+   ],
+   "name": "Intel Arc A370M/A350M (laptop)",
+   "vendor": "intel",
+   "kind": "discrete-laptop",
+   "vram_gb": 4,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 112,
+   "fp16_tflops": 6,
+   "year": 2022
+  },
+  {
+   "match": [
+    "a770"
+   ],
+   "name": "Intel Arc A770 16GB (8GB variant exists)",
+   "vendor": "intel",
+   "kind": "discrete-desktop",
+   "vram_gb": 16,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 560,
+   "fp16_tflops": 39,
+   "year": 2022
+  },
+  {
+   "match": [
+    "a750"
+   ],
+   "name": "Intel Arc A750",
+   "vendor": "intel",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 512,
+   "fp16_tflops": 34,
+   "year": 2022
+  },
+  {
+   "match": [
+    "a580"
+   ],
+   "name": "Intel Arc A580",
+   "vendor": "intel",
+   "kind": "discrete-desktop",
+   "vram_gb": 8,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 512,
+   "fp16_tflops": 24.6,
+   "year": 2023
+  },
+  {
+   "match": [
+    "a380"
+   ],
+   "name": "Intel Arc A380",
+   "vendor": "intel",
+   "kind": "discrete-desktop",
+   "vram_gb": 6,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 186,
+   "fp16_tflops": 8.2,
+   "year": 2022
+  },
+  {
+   "match": [
+    "a310"
+   ],
+   "name": "Intel Arc A310",
+   "vendor": "intel",
+   "kind": "discrete-desktop",
+   "vram_gb": 4,
+   "unified_mem_options_gb": [],
+   "bandwidth_gbs": 124,
+   "fp16_tflops": 5.4,
+   "year": 2022
+  },
+  {
+   "match": [
+    "140v"
+   ],
+   "name": "Intel Arc 140V (Lunar Lake)",
+   "vendor": "intel",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 136,
+   "fp16_tflops": 8.4,
+   "year": 2024
+  },
+  {
+   "match": [
+    "130v"
+   ],
+   "name": "Intel Arc 130V (Lunar Lake)",
+   "vendor": "intel",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 136,
+   "fp16_tflops": 6.6,
+   "year": 2024
+  },
+  {
+   "match": [
+    "140t"
+   ],
+   "name": "Intel Arc 140T (Arrow Lake-H)",
+   "vendor": "intel",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32,
+    64
+   ],
+   "bandwidth_gbs": 120,
+   "fp16_tflops": 9.6,
+   "year": 2025
+  },
+  {
+   "match": [
+    "130t"
+   ],
+   "name": "Intel Arc 130T (Arrow Lake-H)",
+   "vendor": "intel",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 120,
+   "fp16_tflops": 8,
+   "year": 2025
+  },
+  {
+   "match": [
+    "arc(tm) graphics",
+    "arc graphics"
+   ],
+   "name": "Intel Arc Graphics (Meteor Lake, integrated)",
+   "vendor": "intel",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 100,
+   "fp16_tflops": 9,
+   "year": 2023
+  },
+  {
+   "match": [
+    "iris(r) xe",
+    "iris xe"
+   ],
+   "name": "Intel Iris Xe Graphics",
+   "vendor": "intel",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    16,
+    32
+   ],
+   "bandwidth_gbs": 60,
+   "fp16_tflops": 4.2,
+   "year": 2020
+  },
+  {
+   "match": [
+    "uhd graphics"
+   ],
+   "name": "Intel UHD Graphics",
+   "vendor": "intel",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    16
+   ],
+   "bandwidth_gbs": 38,
+   "fp16_tflops": 0.8,
+   "year": 2018
+  },
+  {
+   "match": [
+    "intel(r) graphics",
+    "intel graphics"
+   ],
+   "name": "Intel Graphics (unbranded Xe iGPU, e.g. Core Ultra U / low-end Panther Lake)",
+   "vendor": "intel",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    16,
+    32
+   ],
+   "bandwidth_gbs": 90,
+   "fp16_tflops": 4,
+   "year": 2024
+  },
+  {
+   "match": [
+    "hd graphics"
+   ],
+   "name": "Intel HD Graphics",
+   "vendor": "intel",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    4,
+    8
+   ],
+   "bandwidth_gbs": 25,
+   "fp16_tflops": 0.4,
+   "year": 2015
+  },
+  {
+   "match": [
+    "apple m5 ultra"
+   ],
+   "name": "Apple M5 Ultra (up to 80-core GPU)",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    128,
+    256,
+    512
+   ],
+   "bandwidth_gbs": 1228,
+   "fp16_tflops": 33,
+   "year": 2026
+  },
+  {
+   "match": [
+    "apple m5 max"
+   ],
+   "name": "Apple M5 Max (40-core GPU; 32-core bin 460 GB/s)",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    36,
+    48,
+    64,
+    128
+   ],
+   "bandwidth_gbs": 614,
+   "fp16_tflops": 16,
+   "year": 2026
+  },
+  {
+   "match": [
+    "apple m5 pro"
+   ],
+   "name": "Apple M5 Pro",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    24,
+    48,
+    64
+   ],
+   "bandwidth_gbs": 307,
+   "fp16_tflops": 8,
+   "year": 2026
+  },
+  {
+   "match": [
+    "apple m5"
+   ],
+   "name": "Apple M5",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    24,
+    32
+   ],
+   "bandwidth_gbs": 153,
+   "fp16_tflops": 4,
+   "year": 2025
+  },
+  {
+   "match": [
+    "apple m6"
+   ],
+   "name": "Apple M6 (Mac mini)",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    24,
+    32
+   ],
+   "bandwidth_gbs": 170,
+   "fp16_tflops": 5,
+   "year": 2026
+  },
+  {
+   "match": [
+    "apple m4 max"
+   ],
+   "name": "Apple M4 Max (40-core GPU; 32-core bin 410 GB/s)",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    36,
+    48,
+    64,
+    128
+   ],
+   "bandwidth_gbs": 546,
+   "fp16_tflops": 16,
+   "year": 2024
+  },
+  {
+   "match": [
+    "apple m4 pro"
+   ],
+   "name": "Apple M4 Pro",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    24,
+    48,
+    64
+   ],
+   "bandwidth_gbs": 273,
+   "fp16_tflops": 8.3,
+   "year": 2024
+  },
+  {
+   "match": [
+    "apple m4"
+   ],
+   "name": "Apple M4",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    24,
+    32
+   ],
+   "bandwidth_gbs": 120,
+   "fp16_tflops": 4.3,
+   "year": 2024
+  },
+  {
+   "match": [
+    "apple m3 ultra"
+   ],
+   "name": "Apple M3 Ultra (60/80-core GPU)",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    96,
+    256,
+    512
+   ],
+   "bandwidth_gbs": 819,
+   "fp16_tflops": 28,
+   "year": 2025
+  },
+  {
+   "match": [
+    "apple m3 max"
+   ],
+   "name": "Apple M3 Max (40-core; 30-core bin 300 GB/s)",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    36,
+    48,
+    64,
+    96,
+    128
+   ],
+   "bandwidth_gbs": 400,
+   "fp16_tflops": 16.4,
+   "year": 2023
+  },
+  {
+   "match": [
+    "apple m3 pro"
+   ],
+   "name": "Apple M3 Pro",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    18,
+    36
+   ],
+   "bandwidth_gbs": 150,
+   "fp16_tflops": 7.4,
+   "year": 2023
+  },
+  {
+   "match": [
+    "apple m3"
+   ],
+   "name": "Apple M3",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    16,
+    24
+   ],
+   "bandwidth_gbs": 100,
+   "fp16_tflops": 4.1,
+   "year": 2023
+  },
+  {
+   "match": [
+    "apple m2 ultra"
+   ],
+   "name": "Apple M2 Ultra",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    64,
+    128,
+    192
+   ],
+   "bandwidth_gbs": 800,
+   "fp16_tflops": 27.2,
+   "year": 2023
+  },
+  {
+   "match": [
+    "apple m2 max"
+   ],
+   "name": "Apple M2 Max",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    32,
+    64,
+    96
+   ],
+   "bandwidth_gbs": 400,
+   "fp16_tflops": 13.6,
+   "year": 2023
+  },
+  {
+   "match": [
+    "apple m2 pro"
+   ],
+   "name": "Apple M2 Pro",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 200,
+   "fp16_tflops": 6.8,
+   "year": 2023
+  },
+  {
+   "match": [
+    "apple m2"
+   ],
+   "name": "Apple M2",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    16,
+    24
+   ],
+   "bandwidth_gbs": 100,
+   "fp16_tflops": 3.6,
+   "year": 2022
+  },
+  {
+   "match": [
+    "apple m1 ultra"
+   ],
+   "name": "Apple M1 Ultra",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    64,
+    128
+   ],
+   "bandwidth_gbs": 800,
+   "fp16_tflops": 21,
+   "year": 2022
+  },
+  {
+   "match": [
+    "apple m1 max"
+   ],
+   "name": "Apple M1 Max",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    32,
+    64
+   ],
+   "bandwidth_gbs": 400,
+   "fp16_tflops": 10.4,
+   "year": 2021
+  },
+  {
+   "match": [
+    "apple m1 pro"
+   ],
+   "name": "Apple M1 Pro",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 200,
+   "fp16_tflops": 5.2,
+   "year": 2021
+  },
+  {
+   "match": [
+    "apple m1"
+   ],
+   "name": "Apple M1",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    16
+   ],
+   "bandwidth_gbs": 68,
+   "fp16_tflops": 2.6,
+   "year": 2020
+  },
+  {
+   "match": [
+    "apple a20 pro"
+   ],
+   "name": "Apple A20 Pro (iPhone 18 Pro / Pro Max)",
+   "vendor": "apple",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12
+   ],
+   "bandwidth_gbs": 115,
+   "fp16_tflops": 3,
+   "year": 2026
+  },
+  {
+   "match": [
+    "apple a19 pro"
+   ],
+   "name": "Apple A19 Pro (iPhone 17 Pro / Pro Max / Air)",
+   "vendor": "apple",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12
+   ],
+   "bandwidth_gbs": 76,
+   "fp16_tflops": 2.2,
+   "year": 2025
+  },
+  {
+   "match": [
+    "apple a19"
+   ],
+   "name": "Apple A19 (iPhone 17 / 17e)",
+   "vendor": "apple",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8
+   ],
+   "bandwidth_gbs": 68,
+   "fp16_tflops": 1.9,
+   "year": 2025
+  },
+  {
+   "match": [
+    "apple a18 pro"
+   ],
+   "name": "Apple A18 Pro (iPhone 16 Pro / Pro Max, MacBook Neo)",
+   "vendor": "apple",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8
+   ],
+   "bandwidth_gbs": 60,
+   "fp16_tflops": 2.1,
+   "year": 2024
+  },
+  {
+   "match": [
+    "apple a18"
+   ],
+   "name": "Apple A18 (iPhone 16 / 16e)",
+   "vendor": "apple",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8
+   ],
+   "bandwidth_gbs": 60,
+   "fp16_tflops": 1.8,
+   "year": 2024
+  },
+  {
+   "match": [
+    "apple a17 pro"
+   ],
+   "name": "Apple A17 Pro (iPhone 15 Pro, iPad mini 7)",
+   "vendor": "apple",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8
+   ],
+   "bandwidth_gbs": 51,
+   "fp16_tflops": 2.1,
+   "year": 2023
+  },
+  {
+   "match": [
+    "apple a16"
+   ],
+   "name": "Apple A16 (iPhone 14 Pro, 15)",
+   "vendor": "apple",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    6
+   ],
+   "bandwidth_gbs": 51,
+   "fp16_tflops": 1.8,
+   "year": 2022
+  },
+  {
+   "match": [
+    "apple a15"
+   ],
+   "name": "Apple A15 (iPhone 13, 14)",
+   "vendor": "apple",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    4,
+    6
+   ],
+   "bandwidth_gbs": 34,
+   "fp16_tflops": 1.4,
+   "year": 2021
+  },
+  {
+   "match": [
+    "apple a14"
+   ],
+   "name": "Apple A14 (iPhone 12)",
+   "vendor": "apple",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    4,
+    6
+   ],
+   "bandwidth_gbs": 34,
+   "fp16_tflops": 1,
+   "year": 2020
+  },
+  {
+   "match": [
+    "x2-90"
+   ],
+   "name": "Qualcomm Adreno X2-90 (Snapdragon X2 Elite X2E-88 152 GB/s; X2 Elite Extreme 228 GB/s)",
+   "vendor": "qualcomm",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32,
+    48,
+    64
+   ],
+   "bandwidth_gbs": 152,
+   "fp16_tflops": 11.4,
+   "year": 2026
+  },
+  {
+   "match": [
+    "x2-85"
+   ],
+   "name": "Qualcomm Adreno X2-85 (Snapdragon X2 Elite X2E-80)",
+   "vendor": "qualcomm",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 152,
+   "fp16_tflops": 9,
+   "year": 2026
+  },
+  {
+   "match": [
+    "x2-45"
+   ],
+   "name": "Qualcomm Adreno X2-45 (Snapdragon X2 Plus)",
+   "vendor": "qualcomm",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 152,
+   "fp16_tflops": 4,
+   "year": 2026
+  },
+  {
+   "match": [
+    "x1-85"
+   ],
+   "name": "Qualcomm Adreno X1-85 (Snapdragon X Elite)",
+   "vendor": "qualcomm",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32,
+    64
+   ],
+   "bandwidth_gbs": 135,
+   "fp16_tflops": 9.2,
+   "year": 2024
+  },
+  {
+   "match": [
+    "x1-45"
+   ],
+   "name": "Qualcomm Adreno X1-45 (Snapdragon X Plus / X)",
+   "vendor": "qualcomm",
+   "kind": "integrated",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    16,
+    32
+   ],
+   "bandwidth_gbs": 135,
+   "fp16_tflops": 4,
+   "year": 2024
+  },
+  {
+   "match": [
+    "adreno (tm) 840",
+    "adreno 840"
+   ],
+   "name": "Qualcomm Adreno 840 (Snapdragon 8 Elite Gen 5)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12,
+    16,
+    24
+   ],
+   "bandwidth_gbs": 85,
+   "fp16_tflops": 8.5,
+   "year": 2025
+  },
+  {
+   "match": [
+    "adreno (tm) 830",
+    "adreno 830"
+   ],
+   "name": "Qualcomm Adreno 830 (Snapdragon 8 Elite)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12,
+    16,
+    24
+   ],
+   "bandwidth_gbs": 85,
+   "fp16_tflops": 6.4,
+   "year": 2024
+  },
+  {
+   "match": [
+    "adreno (tm) 829",
+    "adreno 829"
+   ],
+   "name": "Qualcomm Adreno 829 (Snapdragon 8 Gen 5, marketed as Adreno 840)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12,
+    16
+   ],
+   "bandwidth_gbs": 77,
+   "fp16_tflops": 6,
+   "year": 2025
+  },
+  {
+   "match": [
+    "adreno (tm) 825",
+    "adreno 825"
+   ],
+   "name": "Qualcomm Adreno 825 (Snapdragon 8s Gen 4)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12,
+    16
+   ],
+   "bandwidth_gbs": 77,
+   "fp16_tflops": 5,
+   "year": 2025
+  },
+  {
+   "match": [
+    "adreno (tm) 750",
+    "adreno 750"
+   ],
+   "name": "Qualcomm Adreno 750 (Snapdragon 8 Gen 3)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12,
+    16
+   ],
+   "bandwidth_gbs": 77,
+   "fp16_tflops": 5.6,
+   "year": 2023
+  },
+  {
+   "match": [
+    "adreno (tm) 740",
+    "adreno 740"
+   ],
+   "name": "Qualcomm Adreno 740 (Snapdragon 8 Gen 2)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12,
+    16
+   ],
+   "bandwidth_gbs": 68,
+   "fp16_tflops": 4.1,
+   "year": 2022
+  },
+  {
+   "match": [
+    "adreno (tm) 735",
+    "adreno 735"
+   ],
+   "name": "Qualcomm Adreno 735 (Snapdragon 8s Gen 3)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 68,
+   "fp16_tflops": 3.4,
+   "year": 2024
+  },
+  {
+   "match": [
+    "adreno (tm) 732",
+    "adreno 732"
+   ],
+   "name": "Qualcomm Adreno 732 (Snapdragon 7+ Gen 3)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 68,
+   "fp16_tflops": 3,
+   "year": 2024
+  },
+  {
+   "match": [
+    "adreno (tm) 730",
+    "adreno 730"
+   ],
+   "name": "Qualcomm Adreno 730 (Snapdragon 8 Gen 1 / 8+ Gen 1)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 51,
+   "fp16_tflops": 3.4,
+   "year": 2022
+  },
+  {
+   "match": [
+    "adreno (tm) 725",
+    "adreno 725"
+   ],
+   "name": "Qualcomm Adreno 725 (Snapdragon 7+ Gen 2)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 51,
+   "fp16_tflops": 3.6,
+   "year": 2023
+  },
+  {
+   "match": [
+    "adreno (tm) 722",
+    "adreno 722",
+    "adreno (tm) 720",
+    "adreno 720"
+   ],
+   "name": "Qualcomm Adreno 720/722 (Snapdragon 7 Gen 3/4)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 51,
+   "fp16_tflops": 2,
+   "year": 2023
+  },
+  {
+   "match": [
+    "adreno (tm) 710",
+    "adreno 710"
+   ],
+   "name": "Qualcomm Adreno 710 (Snapdragon 7s Gen 2/3)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    6,
+    8
+   ],
+   "bandwidth_gbs": 34,
+   "fp16_tflops": 1.6,
+   "year": 2023
+  },
+  {
+   "match": [
+    "adreno (tm) 660",
+    "adreno 660"
+   ],
+   "name": "Qualcomm Adreno 660 (Snapdragon 888)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 51,
+   "fp16_tflops": 3.4,
+   "year": 2021
+  },
+  {
+   "match": [
+    "adreno (tm) 650",
+    "adreno 650"
+   ],
+   "name": "Qualcomm Adreno 650 (Snapdragon 865/870)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    6,
+    8,
+    12
+   ],
+   "bandwidth_gbs": 44,
+   "fp16_tflops": 2.4,
+   "year": 2020
+  },
+  {
+   "match": [
+    "adreno (tm) 644",
+    "adreno 644",
+    "adreno (tm) 642l",
+    "adreno 642l"
+   ],
+   "name": "Qualcomm Adreno 642L/644 (Snapdragon 778G / 7 Gen 1)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    6,
+    8
+   ],
+   "bandwidth_gbs": 34,
+   "fp16_tflops": 1.8,
+   "year": 2021
+  },
+  {
+   "match": [
+    "adreno (tm) 619",
+    "adreno 619",
+    "adreno (tm) 618",
+    "adreno 618"
+   ],
+   "name": "Qualcomm Adreno 618/619 (Snapdragon 720G/695)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    4,
+    6,
+    8
+   ],
+   "bandwidth_gbs": 17,
+   "fp16_tflops": 0.8,
+   "year": 2021
+  },
+  {
+   "match": [
+    "adreno (tm) 610",
+    "adreno 610",
+    "adreno (tm) 613",
+    "adreno 613"
+   ],
+   "name": "Qualcomm Adreno 610/613 (Snapdragon 6xx/4 Gen)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    3,
+    4,
+    6
+   ],
+   "bandwidth_gbs": 15,
+   "fp16_tflops": 0.4,
+   "year": 2020
+  },
+  {
+   "match": [
+    "dxt-48-1536",
+    "powervr d-series"
+   ],
+   "name": "Google Tensor G5 (PowerVR DXT-48-1536)",
+   "vendor": "google",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12,
+    16
+   ],
+   "bandwidth_gbs": 68,
+   "fp16_tflops": 3,
+   "year": 2025
+  },
+  {
+   "match": [
+    "mali-g715 mc7",
+    "mali-g715 mp7"
+   ],
+   "name": "Google Tensor G3/G4 (Mali-G715 MC7)",
+   "vendor": "google",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12,
+    16
+   ],
+   "bandwidth_gbs": 68,
+   "fp16_tflops": 3,
+   "year": 2023
+  },
+  {
+   "match": [
+    "mali-g710 mp7",
+    "mali-g710 mc7"
+   ],
+   "name": "Google Tensor G2 (Mali-G710 MP7)",
+   "vendor": "google",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 51,
+   "fp16_tflops": 2.3,
+   "year": 2022
+  },
+  {
+   "match": [
+    "mali-g78 mp20"
+   ],
+   "name": "Google Tensor G1 (Mali-G78 MP20)",
+   "vendor": "google",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 51,
+   "fp16_tflops": 3,
+   "year": 2021
+  },
+  {
+   "match": [
+    "xclipse 960"
+   ],
+   "name": "Samsung Xclipse 960 (Exynos 2600, Galaxy S26)",
+   "vendor": "samsung",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12,
+    16
+   ],
+   "bandwidth_gbs": 85,
+   "fp16_tflops": 8,
+   "year": 2026
+  },
+  {
+   "match": [
+    "xclipse 950"
+   ],
+   "name": "Samsung Xclipse 950 (Exynos 2500)",
+   "vendor": "samsung",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12
+   ],
+   "bandwidth_gbs": 77,
+   "fp16_tflops": 7,
+   "year": 2025
+  },
+  {
+   "match": [
+    "xclipse 940"
+   ],
+   "name": "Samsung Xclipse 940 (Exynos 2400)",
+   "vendor": "samsung",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 68,
+   "fp16_tflops": 6.8,
+   "year": 2024
+  },
+  {
+   "match": [
+    "xclipse 920"
+   ],
+   "name": "Samsung Xclipse 920 (Exynos 2200)",
+   "vendor": "samsung",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 51,
+   "fp16_tflops": 2.6,
+   "year": 2022
+  },
+  {
+   "match": [
+    "xclipse 540",
+    "xclipse 530"
+   ],
+   "name": "Samsung Xclipse 530/540 (Exynos 1480/1580)",
+   "vendor": "samsung",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    6,
+    8
+   ],
+   "bandwidth_gbs": 34,
+   "fp16_tflops": 1.5,
+   "year": 2024
+  },
+  {
+   "match": [
+    "mali-g1-ultra",
+    "mali-g1 ultra",
+    "mali-g1"
+   ],
+   "name": "Arm Mali-G1 family (Dimensity 9500: G1-Ultra)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12,
+    16
+   ],
+   "bandwidth_gbs": 85,
+   "fp16_tflops": 10,
+   "year": 2025
+  },
+  {
+   "match": [
+    "immortalis-g925",
+    "mali-g925"
+   ],
+   "name": "Arm Immortalis-G925 (Dimensity 9400)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12,
+    16
+   ],
+   "bandwidth_gbs": 85,
+   "fp16_tflops": 8,
+   "year": 2024
+  },
+  {
+   "match": [
+    "immortalis-g720",
+    "mali-g720-immortalis",
+    "mali-g720"
+   ],
+   "name": "Arm Immortalis/Mali-G720 (Dimensity 9300 / 8400)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12,
+    16
+   ],
+   "bandwidth_gbs": 77,
+   "fp16_tflops": 6,
+   "year": 2023
+  },
+  {
+   "match": [
+    "immortalis-g715",
+    "mali-g715-immortalis"
+   ],
+   "name": "Arm Immortalis-G715 (Dimensity 9200)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    12,
+    16
+   ],
+   "bandwidth_gbs": 68,
+   "fp16_tflops": 5,
+   "year": 2022
+  },
+  {
+   "match": [
+    "mali-g715"
+   ],
+   "name": "Arm Mali-G715",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12,
+    16
+   ],
+   "bandwidth_gbs": 68,
+   "fp16_tflops": 3.2,
+   "year": 2023
+  },
+  {
+   "match": [
+    "mali-g710"
+   ],
+   "name": "Arm Mali-G710 (Dimensity 9000)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 60,
+   "fp16_tflops": 3.6,
+   "year": 2022
+  },
+  {
+   "match": [
+    "mali-g78"
+   ],
+   "name": "Arm Mali-G78 (Exynos 2100, Dimensity 1200)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 45,
+   "fp16_tflops": 2.5,
+   "year": 2021
+  },
+  {
+   "match": [
+    "mali-g77"
+   ],
+   "name": "Arm Mali-G77 (Dimensity 1000/1100, Exynos 990)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 34,
+   "fp16_tflops": 1.8,
+   "year": 2020
+  },
+  {
+   "match": [
+    "mali-g615"
+   ],
+   "name": "Arm Mali-G615 (Dimensity 7300 / 8300)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    8,
+    12
+   ],
+   "bandwidth_gbs": 34,
+   "fp16_tflops": 1.5,
+   "year": 2024
+  },
+  {
+   "match": [
+    "mali-g610"
+   ],
+   "name": "Arm Mali-G610 (Dimensity 8100/8200, RK3588)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    6,
+    8,
+    12
+   ],
+   "bandwidth_gbs": 34,
+   "fp16_tflops": 1.4,
+   "year": 2022
+  },
+  {
+   "match": [
+    "mali-g68"
+   ],
+   "name": "Arm Mali-G68 (Dimensity 900/1080/7050, Exynos 1280/1380)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    6,
+    8
+   ],
+   "bandwidth_gbs": 34,
+   "fp16_tflops": 1,
+   "year": 2021
+  },
+  {
+   "match": [
+    "mali-g76"
+   ],
+   "name": "Arm Mali-G76 (Exynos 9820, Helio G90)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    4,
+    6,
+    8
+   ],
+   "bandwidth_gbs": 30,
+   "fp16_tflops": 1,
+   "year": 2019
+  },
+  {
+   "match": [
+    "mali-g57"
+   ],
+   "name": "Arm Mali-G57 (Dimensity 700/6100, Helio)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    4,
+    6,
+    8
+   ],
+   "bandwidth_gbs": 17,
+   "fp16_tflops": 0.5,
+   "year": 2021
+  },
+  {
+   "match": [
+    "mali-g52"
+   ],
+   "name": "Arm Mali-G52 (Helio G-series, budget)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    3,
+    4,
+    6
+   ],
+   "bandwidth_gbs": 14,
+   "fp16_tflops": 0.3,
+   "year": 2019
+  },
+  {
+   "match": [
+    "apple gpu"
+   ],
+   "name": "Apple GPU (masked by Safari; iPhone/iPad/Mac unknown)",
+   "vendor": "apple",
+   "kind": "apple-silicon",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    6,
+    8,
+    16
+   ],
+   "bandwidth_gbs": 60,
+   "fp16_tflops": 2,
+   "year": 2022
+  },
+  {
+   "match": [
+    "adreno"
+   ],
+   "name": "Qualcomm Adreno (unknown model)",
+   "vendor": "qualcomm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    4,
+    6,
+    8
+   ],
+   "bandwidth_gbs": 34,
+   "fp16_tflops": 1.5,
+   "year": 2021
+  },
+  {
+   "match": [
+    "mali",
+    "immortalis"
+   ],
+   "name": "Arm Mali (unknown model)",
+   "vendor": "arm",
+   "kind": "mobile-soc",
+   "vram_gb": 0,
+   "unified_mem_options_gb": [
+    4,
+    6,
+    8
+   ],
+   "bandwidth_gbs": 25,
+   "fp16_tflops": 1,
+   "year": 2020
+  }
+ ],
+ "changelog": [
+  "ADDED Apple M5 Ultra (Mac Studio, announced 2026-08-25, shipped 2026-09-22): up to 80-core GPU, up to 512GB, 1.2 TB/s (1228 used). Memory tiers 128/256/512 are an estimate; only the 512 max is confirmed. https://www.apple.com/newsroom/2026/08/apple-introduces-m6-and-m5-ultra-for-a-big-leap-in-performance-and-ai-compute/ , https://www.apple.com/newsroom/2026/08/apple-introduces-new-mac-studio-with-m5-max-and-m5-ultra/",
+  "ADDED Apple M6 (Mac mini, shipped 2026-09-22): 12-core GPU, up to 32GB, 170 GB/s. Same Apple newsroom source. FP16 of 5 is an estimate.",
+  "FIXED Apple A20 Pro bandwidth 77 to 115 GB/s. The chip moves from a 64-bit to a 96-bit LPDDR5X bus, which Apple states as +50% over A19 Pro (about 76 GB/s). The draft value was simply A19 Pro's. iPhone 18 Pro was announced 2026-09-09 with 12GB (confirmed). https://www.macrumors.com/2026/09/03/iphone-18-pro-chip-leak-suggests-improvements/ , https://www.macrumors.com/roundup/iphone-18-pro/",
+  "FIXED A19 Pro bandwidth 77 to 76 (LPDDR5X-9600, 75.8 GB/s). https://en.wikipedia.org/wiki/Apple_A19",
+  "UPDATED A18 Pro name to include MacBook Neo (released March 2026, A18 Pro, 8GB LPDDR5X-7500). Chrome on that Mac would report 'Apple A18 Pro'. https://support.apple.com/en-us/126322 , https://en.wikipedia.org/wiki/MacBook_Neo",
+  "CONFIRMED M5 Pro 307 GB/s up to 64GB, and M5 Max 614 GB/s (40-core) / 460 GB/s (32-core) with 36-128GB. https://support.apple.com/en-us/126318 , https://www.apple.com/newsroom/2026/03/apple-debuts-m5-pro-and-m5-max-to-supercharge-the-most-demanding-pro-workflows/ . The draft's source URL slug 'apple-introduces-macbook-pro-with-all-new-m5-pro-and-m5-max' could not be confirmed; the real newsroom slug is the one given here.",
+  "FIXED Snapdragon X2 name. Adreno X2-90 is on both X2E-96/94 Extreme (192-bit, 228 GB/s) and the regular X2E-88 X2 Elite (128-bit, 152 GB/s). X2-85 is only on X2E-80. All support up to 128GB. https://www.cnx-software.com/2025/10/02/snapdragon-x2-elite-extreme-and-x2-elite-processors-target-high-end-windows-pcs/",
+  "ADDED Intel Arc Pro B70 32GB (released 2026-03-25): 32 Xe2 cores, 608 GB/s, 22.9 TFLOPS FP32, so 45.8 FP16. https://www.tomshardware.com/pc-components/gpus/intel-arc-pro-b70-and-arc-pro-b65-gpus-bring-32gb-of-ram-to-ai-and-pro-apps-bigger-battlemage-finally-arrives-but-its-not-for-gaming",
+  "ADDED Intel Arc Pro B65 32GB: 20 Xe2 cores, 608 GB/s, 12.28 TFLOPS FP32. https://www.techpowerup.com/347703/intel-announces-arc-pro-b70-and-arc-pro-b65-gpus-maxes-out-xe2-battlemage-architecture",
+  "NOT ADDED: Intel Arc B770. It leaked (16GB, 608 GB/s) but is still unannounced and on hold as of Sept 2026. https://biggo.com/news/202601131050_Intel-Arc-B770-Specs-Leak-16GB-VRAM-608GB-s-Bandwidth",
+  "NOT ADDED: RTX 50 SUPER (5070S 18GB / 5080S 24GB). Reported on hold and not launched as of Sept 2026. https://tech-insider.org/nvidia-rtx-50-super-delay-2026/",
+  "NOT ADDED: NVIDIA RTX Spark N1X (about 300 GB/s, up to 128GB). It launches October 2026, after today; add it on release. https://www.tomshardware.com/laptops/nvidias-rtx-spark-n1x-launches-in-october-for-laptops-and-desktops-18-or-20-cpu-cores-paired-with-5-120-or-6-144-cuda-cores-up-to-128gb-of-unified-memory",
+  "FIXED Radeon AI PRO R9700 bandwidth 644 to 640 GB/s (20 Gbps x 256-bit). FP16 vector 95.7 confirmed. https://www.phoronix.com/review/amd-radeon-ai-pro-r9700",
+  "FIXED RX 9070 GRE FP16 58 to 68.6 (AMD FP32 vector 34.3 x2; 48 CU; 432 GB/s confirmed). https://www.techpowerup.com/review/sapphire-radeon-rx-9070-gre-pulse/",
+  "FIXED RX 9060 (non-XT, OEM) bandwidth 322 to 288 (18 Gbps x 128-bit, 28 CU) and FP16 40 to 37 (estimate). https://www.techpowerup.com/339595/amd-officially-launches-radeon-rx-9060-non-xt-gpu",
+  "CONFIRMED RTX 5080 Laptop 16GB/256-bit/896 GB/s and RTX 5070 Ti Laptop 12GB/192-bit/672 GB/s. RTX 5070 Laptop name now notes a 12GB variant launched in 2026. https://laptopmedia.com/video-card/nvidia-geforce-rtx-5080-laptop/ , https://www.tomshardware.com/pc-components/gpus/nvidia-quietly-launches-12gb-rtx-5070-laptop-gpu-midrange-mobile-gaming-gets-more-vram-amid-the-rampocalypse",
+  "CONFIRMED Panther Lake Arc B390: 12 Xe3 cores, 7.68 TFLOPS FP32 (FP16 set to 15.4), LPDDR5X-9600 = 153.6 GB/s. Added a 96GB memory option. https://www.techpowerup.com/345897/intel-mandates-7-467-mt-s-memory-for-panther-lake-arc-b390-b370-integrated-graphics",
+  "SPLIT H100 NVL out of the H100 PCIe entry. It is 94GB HBM3 at 3.9 TB/s, not 80GB at 2.0 TB/s. The draft mapped it to the PCIe 80GB card (NVIDIA H100 datasheet, from memory).",
+  "ADDED Adreno 829 (Snapdragon 8 Gen 5 non-Elite; Qualcomm markets it as 'Adreno 840', but it reports 829). FP16 and bandwidth are estimates. https://m.gsmarena.com/geekbench_reveals_the_differences_between_the_snapdragon_8_gen_5_and_8_elite_gen_5_gpus-news-70547.php",
+  "CONFIRMED Exynos 2600 / Xclipse 960 in Galaxy S26 (LPDDR5X-10.7, about 85 GB/s). TFLOPS stays an estimate because sources conflict. https://www.techpowerup.com/344259/samsung-unveils-the-exynos-2600-without-fanfare",
+  "CONFIRMED Tensor G5 = 2-core PowerVR DXT-48-1536 @1.1GHz, 12GB (Pixel 10) / 16GB (Pro). https://www.androidauthority.com/google-tensor-g5-benchmarks-3590355/",
+  "ADDED Radeon 860M (8 CU) and 840M (4 CU), Krackan Point, 2025. https://www.notebookcheck.net/Radeon-860M-vs-Radeon-890M-vs-Radeon-820M_12988_12524_13109.247532.0.html",
+  "RECOMPUTED iGPU FP16 from CU x 64 x 2 (dual-issue) x 2 (FMA) x clock x2 (FP16), for the same basis as the RDNA3 dGPUs: 780M 17.8 to 16.6, 880M 19 to 17.8, 760M 12 to 10.6, 740M 5.9 to 5.1, 680M 6.8 to 7.4, 660M 3.7 to 2.9, Arc 130V 7.3 to 6.6.",
+  "ADDED popular enthusiast/used-market LLM cards: Tesla P40 24GB (347 GB/s), Tesla P100 16GB (732), AMD Instinct MI50/MI60 32GB (1024), Radeon VII 16GB (1024), RX Vega 56/64 (484), TITAN RTX 24GB (672).",
+  "ADDED missing consumer SKUs: RTX 2050 laptop (4GB, 112 GB/s), RTX 3050 6GB desktop (168 GB/s), RX 7900M laptop (16GB, 576 GB/s), and a generic 'intel(r) graphics' entry for unbranded Xe iGPUs, placed before 'hd graphics'.",
+  "RECLASSIFIED workstation cards (RTX PRO 6000/5000/4000 Blackwell, RTX x000 Ada, RTX Axxxx) from datacenter to discrete-desktop. They are PCIe workstation boards that appear in desktop browsers.",
+  "FIXED Mali chipset labels: Mali-G720 is Dimensity 9300 (Immortalis) / 8400, not 8300. Mali-G615 covers Dimensity 7300 and 8300. Mali-G610 is Dimensity 8100/8200 and RK3588, not 1080/7050, which are G68. Mali-G77 covers Dimensity 1000/1100/1200.",
+  "RTX 5050 Laptop FP16 11 to 10 (2560 cores at typical laptop clocks). MX130-MX350 label corrected to Maxwell/Pascal.",
+  "ORDERING: a script checked all 256 entries. No match string is a substring of an earlier entry's match string, so there is no shadowing. Specific-before-general order is kept (laptop before desktop, XTX before XT, 7900M before 7900 XT, B70/B65/B60/B50 before B580, M5 Ultra/Max/Pro before M5, intel(r) graphics before hd graphics)."
+ ],
+ "notes": "The draft said it had 196 entries. The corrected table has 256.\n\nMatching: take the first entry, in order, whose substring appears in the lower-cased WebGL UNMASKED_RENDERER or WebGPU adapter string. The (r)/(tm) marks are accepted as they appear.\n\n**Confirmed this session:**\n- M5 Pro/Max: Apple support spec page.\n- M5 Ultra and M6: Apple Newsroom, Aug 2026.\n- A20 Pro: 96-bit bus (MacRumors); iPhone 18 Pro announced 2026-09-09 with 12GB.\n- MacBook Neo: A18 Pro, 8GB.\n- Snapdragon X2 SKUs and GPUs: CNX Software.\n- Arc Pro B70/B65: Tom's Hardware / TechPowerUp.\n- R9700 at 640 GB/s: Phoronix.\n- RX 9060 and RX 9070 GRE: TechPowerUp.\n- RTX 5080 and 5070 Ti laptop bandwidth.\n- Panther Lake B390.\n- Tensor G5.\n- Exynos 2600.\n\n**Not confirmed; standard published figures from memory:** the other NVIDIA, AMD and Intel desktop and datacenter specs.\n\n**Estimates (low confidence):**\n- All mobile-SoC TFLOPS.\n- Adreno X2 TFLOPS.\n- Adreno 829.\n- Xclipse 950 and 960 TFLOPS.\n- M5 Ultra memory tiers other than the confirmed 512GB maximum.\n- M6 TFLOPS.\n- Integrated-GPU bandwidth, which is the typical platform RAM speed and varies by laptop.\n\n**Known caveats:**\n1. **fp16_tflops for Pascal** (GTX 10xx, P40, MX1xx-3xx) is the literal 1/64-rate FP16. llama.cpp runs these cards in FP32, so for speed estimates the app should use about 64x this value (e.g. GTX 1080 Ti about 11.3, P40 about 11.8). Otherwise it will wrongly rate them as unusable.\n2. **Apple fp16_tflops is listed at the FP32 rate.** The A19/M5-generation GPU (Apple10) reportedly doubles FP16 throughput and adds per-core neural accelerators, so M5, M5 Pro, M5 Max, M5 Ultra, M6, A19 and A20 FP16 may be about 2x the table value. For LLM decode, bandwidth dominates anyway.\n3. **Adreno X2-90 cannot be told apart by string** between X2E-88 (152 GB/s) and X2 Elite Extreme (228 GB/s). The table uses the conservative 152.\n4. **Mali strings:** Tensor G2-G4 entries match only if the driver string includes a core count (MC7/MP7). Otherwise the generic Mali-G7xx entries catch them, which is fine.\n5. **Safari and iOS return \"apple gpu\"** and cannot tell iPhone, iPad and Mac apart. Consider a software-renderer check (strings with \"swiftshader\", \"llvmpipe\" or \"microsoft basic render\") outside this table and treat those as no GPU.\n6. **Excluded as unreleased as of 2026-09-29:** NVIDIA RTX Spark N1X (October 2026), RTX 50 SUPER (on hold) and Intel Arc B770 (on hold). Add them when they ship."
+}
