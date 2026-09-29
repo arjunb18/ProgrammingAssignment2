@@ -164,7 +164,7 @@
     {"match":["140t"],"name":"Intel Arc 140T (Arrow Lake-H)","vendor":"intel","kind":"integrated","vramGB":0,"unifiedOptionsGB":[16,32,64],"bandwidthGBs":120,"fp16Tflops":9.6,"year":2025},
     {"match":["130t"],"name":"Intel Arc 130T (Arrow Lake-H)","vendor":"intel","kind":"integrated","vramGB":0,"unifiedOptionsGB":[16,32],"bandwidthGBs":120,"fp16Tflops":8,"year":2025},
     {"match":["arc(tm) graphics","arc graphics"],"name":"Intel Arc Graphics (Meteor Lake, integrated)","vendor":"intel","kind":"integrated","vramGB":0,"unifiedOptionsGB":[16,32],"bandwidthGBs":100,"fp16Tflops":9,"year":2023},
-    {"match":["iris(r) xe","iris xe"],"name":"Intel Iris Xe Graphics","vendor":"intel","kind":"integrated","vramGB":0,"unifiedOptionsGB":[8,16,32],"bandwidthGBs":60,"fp16Tflops":4.2,"year":2020},
+    {"match":["iris(r) xe","iris xe","xe graphics"],"name":"Intel Iris Xe Graphics","vendor":"intel","kind":"integrated","vramGB":0,"unifiedOptionsGB":[8,16,32],"bandwidthGBs":60,"fp16Tflops":4.2,"year":2020},
     {"match":["uhd graphics"],"name":"Intel UHD Graphics","vendor":"intel","kind":"integrated","vramGB":0,"unifiedOptionsGB":[8,16],"bandwidthGBs":38,"fp16Tflops":0.8,"year":2018},
     {"match":["hd graphics"],"name":"Intel HD Graphics","vendor":"intel","kind":"integrated","vramGB":0,"unifiedOptionsGB":[4,8],"bandwidthGBs":25,"fp16Tflops":0.4,"year":2015},
     {"match":["apple m5 max"],"name":"Apple M5 Max (40-core GPU; 32-core bin 460 GB/s)","vendor":"apple","kind":"apple-silicon","vramGB":0,"unifiedOptionsGB":[36,48,64,128],"bandwidthGBs":614,"fp16Tflops":16,"year":2026},

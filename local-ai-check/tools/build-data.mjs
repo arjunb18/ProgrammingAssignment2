@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DIFFUSION, SPEECH, WEBLLM, BROWSER_OTHER, DROP, kindFor } from './curation.mjs';
+import { DIFFUSION, SPEECH, WEBLLM, BROWSER_OTHER, DROP, GPU_EXTRA_MATCH, kindFor } from './curation.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const research = (name) => {
@@ -103,6 +103,7 @@ const gpuCat = research('gpu-table');
 const gpus = [];
 for (const g of gpuCat.gpus) {
   const match = (g.match || []).map((s) => s.toLowerCase().trim()).filter(Boolean);
+  for (const [re, extra] of GPU_EXTRA_MATCH) if (re.test(g.name)) match.push(...extra);
   // Safari's fixed "Apple GPU" string says nothing about the chip; detect.js handles it per OS.
   if (match.length === 1 && match[0] === 'apple gpu') continue;
   if (!match.length) { warn(`GPU ${g.name} has no match strings`); continue; }

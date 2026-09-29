@@ -85,24 +85,33 @@
 
   // ---------------------------------------------------------------- memory
 
-  // Chromium reports RAM rounded to a power of two, capped (8 GB historically; 32 GB on newer desktop builds).
+  function chromiumMajor(ua) {
+    var m = String(ua.raw || '').match(/(?:Chrome|CriOS|Chromium)\/(\d+)/);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+
+  // Chromium reports RAM as a power of two with a cap: 8 GB before Chrome 147; from 147 desktop
+  // reports up to 32 GB while Android stays capped at 8 GB. The top bucket is a floor, not a value.
   function readMemory(ua) {
     var n = nav();
     var mem = { reportedGB: null, estimatedGB: 8, source: 'default', capped: false, confidence: 'low' };
     var dm = null;
     try { dm = typeof n.deviceMemory === 'number' ? n.deviceMemory : null; } catch (e) { dm = null; }
+    var desktop = ua.formFactor === 'desktop';
     if (dm && dm > 0) {
+      var major = chromiumMajor(ua);
+      var cap = desktop && (major >= 147 || dm > 8) ? 32 : 8;
       mem.reportedGB = dm;
       mem.source = 'deviceMemory';
       mem.estimatedGB = dm;
-      var desktop = ua.formFactor === 'desktop';
-      // Treat the top bucket as a floor: the real amount may be higher.
-      mem.capped = dm >= 32 || (dm === 8 && desktop);
+      mem.capped = dm >= cap;
       mem.confidence = mem.capped ? 'medium' : 'high';
-      // Values are rounded down to a power of two; a "4" is usually a 6 GB phone, "8" often 12 GB.
-      if (!desktop && dm === 4) { mem.estimatedGB = 6; mem.confidence = 'medium'; }
-      if (!desktop && dm === 8) { mem.estimatedGB = 8; mem.confidence = 'medium'; }
-      if (desktop && dm === 8) { mem.estimatedGB = 16; mem.confidence = 'low'; }
+      if (mem.capped && cap === 8) {
+        // "8" on an older desktop browser or any phone means "8 GB or more".
+        mem.estimatedGB = desktop ? 16 : 8;
+        mem.confidence = desktop ? 'low' : 'medium';
+      }
+      if (!desktop && dm === 4) { mem.estimatedGB = 6; mem.confidence = 'medium'; } // 4-6 GB phones report 4
     } else {
       // No API (Safari, Firefox): fall back to common configurations per platform.
       var guess = { ios: 6, ipados: 8, android: 8, mac: 16, windows: 16, linux: 16, chromeos: 8, other: 8 };

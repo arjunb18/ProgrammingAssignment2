@@ -24,11 +24,11 @@ export const DIFFUSION = [
   [/wan 2\.1.*1\.3b/i, 14000, 'clip', '480p 5 s clip ≈ 4 min on an RTX 4090'],
   [/wan 2\.2.*5b/i, 31000, 'clip', '720p 5 s clip ≈ 9 min on an RTX 4090'],
   [/wan 2\.2.*a14b/i, 87000, 'clip', '720p 5 s clip ≈ 25 min on an RTX 4090'],
-  [/wan 2\.[5-9]/i, 87000, 'clip', ''],
   [/ltx-video/i, 900, 'clip', 'distilled, ≈ 15 s per clip on an RTX 4090'],
   [/ltx-2/i, 9000, 'clip', '≈ 2.5 min per clip on an RTX 4090'],
   [/hunyuanvideo/i, 35000, 'clip', '480p ≈ 10 min on an RTX 4090'],
   [/mochi/i, 70000, 'clip', '≈ 20 min on an RTX 4090'],
+  [/minimax h3/i, 14000, 'clip', 'video + audio, ≈ 4 min per clip on an RTX 4090 (INT8)'],
   [/musicgen/i, 170, 'clip', '10 s of music ≈ 3 s on an RTX 4090'],
   [/stable audio open small/i, 60, 'clip', 'Arm-optimised; ≈ 1 s per clip on a 4090'],
   [/stable audio open/i, 290, 'clip', '≈ 5 s per clip on an RTX 4090'],
@@ -58,6 +58,9 @@ export const SPEECH = [
   [/chatterbox/i, { tokPerAudioSec: 25, decB: 0.5, encTflopPerAudioSec: 0.5 }],
   [/vibevoice/i, { tokPerAudioSec: 7.5, decB: 1.5, encTflopPerAudioSec: 0.3 }],
   [/qwen3-tts/i, { tokPerAudioSec: 25, decB: 1.7, encTflopPerAudioSec: 0.05 }],
+  [/zonos/i, { tokPerAudioSec: 86, decB: 0.9, encTflopPerAudioSec: 0.01 }],
+  [/breeze tts/i, { tokPerAudioSec: 25, decB: 3, encTflopPerAudioSec: 0.05 }],
+  [/cohere transcribe/i, { tokPerAudioSec: 3, decB: 0.3, encTflopPerAudioSec: 0.15 }],
 ];
 
 // WebLLM prebuilt models (mlc-ai/web-llm src/config.ts): our model name → WebLLM base model.
@@ -129,3 +132,8 @@ export function kindFor(modality) {
     default: return 'llm';
   }
 }
+
+// Extra renderer spellings for GPU table entries (entry name regex → additional match strings).
+export const GPU_EXTRA_MATCH = [
+  [/^Intel Iris Xe Graphics$/, ['xe graphics']], // Linux Mesa: "Mesa Intel(R) Xe Graphics (TGL GT2)"
+];
