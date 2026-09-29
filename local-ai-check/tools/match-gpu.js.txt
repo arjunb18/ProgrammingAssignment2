@@ -1,0 +1,50 @@
+
+  // AMD APUs report a generic "AMD Radeon(TM) Graphics"; the PCI device id names the chip.
+  var PCI_IDS = {
+    '15bf': 'radeon 780m', '15c8': 'radeon 760m', '1586': 'radeon 8060s', '150e': 'radeon 890m', '1681': 'radeon 680m'
+  };
+
+  function normalise(s) {
+    return String(s || '').toLowerCase()
+      .replace(/\((tm|r)\)/g, ' ')
+      .replace(/, or similar$/, '')
+      .replace(/\s+/g, ' ')
+      .replace(/^\s+|\s+$/g, '');
+  }
+
+  function isAlnum(ch) { return !!ch && /[a-z0-9]/.test(ch); }
+
+  // True when needle appears in hay as a whole token run (so "rx 580" does not match "rx 5800").
+  function containsToken(hay, needle) {
+    var from = 0;
+    while (true) {
+      var i = hay.indexOf(needle, from);
+      if (i < 0) { return false; }
+      if (!isAlnum(hay.charAt(i - 1)) && !isAlnum(hay.charAt(i + needle.length))) { return true; }
+      from = i + 1;
+    }
+  }
+
+  // Maps a WebGL renderer / WebGPU description string to a GPUS entry, or null.
+  LAC.matchGpu = function (str) {
+    if (!str) { return null; }
+    var raw = String(str).toLowerCase();
+    if (/swiftshader|llvmpipe|softpipe|basic render|microsoft basic|software rasterizer/.test(raw)) { return null; }
+    var norm = normalise(str);
+    var pci = raw.match(/0x0000([0-9a-f]{4})/);
+    if (pci && PCI_IDS[pci[1]]) { norm = norm + ' ' + PCI_IDS[pci[1]]; }
+    for (var i = 0; i < LAC.GPUS.length; i++) {
+      var g = LAC.GPUS[i];
+      for (var j = 0; j < g.match.length; j++) {
+        var m = g.match[j];
+        if (containsToken(norm, normalise(m)) || containsToken(raw, m)) { return g; }
+      }
+    }
+    return null;
+  };
+
+  // "Intel Arc 140V GPU (16GB)" style strings reveal the system RAM.
+  LAC.ramFromRenderer = function (str) {
+    var m = String(str || '').match(/\((\d{1,3})\s?gb\)/i);
+    return m ? parseInt(m[1], 10) : null;
+  };

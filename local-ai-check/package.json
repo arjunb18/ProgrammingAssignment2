@@ -1,0 +1,15 @@
+{
+  "name": "local-ai-check",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Client-side web page that checks which local AI models a visiting device can run.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node build.mjs && node test/run.mjs",
+    "serve": "node build.mjs && npx --yes http-server ../docs -p 8080 -c-1"
+  },
+  "devDependencies": {
+    "acorn": "8.15.0"
+  }
+}
