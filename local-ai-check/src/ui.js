@@ -1,5 +1,9 @@
 /*
  * Rendering. Plain DOM + HTML strings (escaped) so it runs everywhere. ES5 only.
+ *
+ * Controls the user is operating (the search box, the "Correct the details" dropdowns) are built
+ * once and never replaced, so typing, IME composition and keyboard focus survive re-renders.
+ * Everything else is re-rendered from state; after a re-render the clicked control gets focus back.
  */
 (function (LAC) {
   'use strict';
@@ -10,13 +14,17 @@
   var els = {};
   var overrideHandler = null;
   var rescanHandler = null;
-  var current = { device: null, budget: null };
+  var current = { device: null, budget: null, all: null };
   var state = {
     target: 'native',
     filter: 'all',
     query: '',
     expanded: { well: false, slow: false, no: false }
   };
+  var lastCounts = null;   // verdict counts of the last full render, for the "scan finished" announcement
+  var askShown = false;    // the RAM question was shown during this scan (keep it after an answer)
+  var fixBuilt = false;    // the "Correct the details" panel exists (rebuilt only by a new scan)
+  var legendOpen = false;
 
   var FILTERS = [
     { id: 'all', label: 'All', mods: null },
@@ -28,6 +36,7 @@
     { id: 'other', label: 'Embeddings & music', mods: ['embedding', 'music-audio'] }
   ];
 
+  // PICKS[0] also drives the headline's "most capable chat model", so the two always agree.
   var PICKS = [
     { label: 'Chat', mods: ['text'] },
     { label: 'Reasoning', mods: ['reasoning'] },
@@ -41,11 +50,25 @@
   var LIMITS = { well: 25, slow: 25, no: 12 };
   var RAM_OPTIONS = [2, 3, 4, 6, 8, 12, 16, 18, 24, 32, 36, 48, 64, 96, 128, 192, 256, 512];
   var VERDICT_TEXT = { well: 'Runs well', slow: 'Runs slowly', no: "Won't run" };
+  var TOKS_TITLE = 'tokens per second: a token is about 3/4 of a word';
+
+  // App store pages for the phone apps the page recommends.
+  var APPS = {
+    pocketpalIos: 'https://apps.apple.com/app/pocketpal-ai/id6502579498',
+    pocketpalAndroid: 'https://play.google.com/store/apps/details?id=com.pocketpalai',
+    privateLlm: 'https://privatellm.app/',
+    edgeGallery: 'https://play.google.com/store/apps/details?id=com.google.ai.edge.gallery',
+    drawThings: 'https://drawthings.ai/',
+    comfy: 'https://www.comfy.org/'
+  };
 
   function $(id) { return document.getElementById(id); }
 
   function init() {
     els.probes = $('probes');
+    els.scanDetails = $('scan-details');
+    els.scanSummary = $('scan-summary');
+    els.status = $('sr-status');
     els.device = $('device');
     els.deviceBody = $('device-body');
     els.results = $('results');
@@ -73,6 +96,21 @@
 
   function saveView() { U.storage.set('view', { target: state.target, filter: state.filter }); }
 
+  // Screen readers hear this once; the probe list itself is not a live region (it changes 18 times).
+  function announce(text) {
+    if (!els.status) { return; }
+    els.status.textContent = '';
+    setTimeout(function () { els.status.textContent = text; }, 50);
+  }
+
+  // Moves focus back to a control after the region holding it was re-rendered.
+  function refocus(selector) {
+    try {
+      var el = els.resultsBody && els.resultsBody.querySelector(selector);
+      if (el && el.focus) { el.focus(); }
+    } catch (e) { /* ignore */ }
+  }
+
   // ---------------------------------------------------------------- scan checklist
 
   function progress(step, status, detail) {
@@ -85,6 +123,10 @@
   }
 
   function resetProgress() {
+    askShown = false;
+    fixBuilt = false;
+    if (els.scanDetails) { els.scanDetails.open = true; }
+    if (els.scanSummary) { els.scanSummary.textContent = 'Checking this device…'; }
     if (!els.probes) { return; }
     var items = els.probes.querySelectorAll('.probe');
     for (var i = 0; i < items.length; i++) {
@@ -94,14 +136,25 @@
     }
   }
 
+  // The scan finished and results are on screen: fold the checklist into its one-line summary
+  // so the answer sits right under the title. Focus and scroll position are left alone.
+  function scanDone() {
+    if (els.rescan) { els.rescan.hidden = false; }
+    if (els.scanDetails && current.budget) { els.scanDetails.open = false; }
+    if (lastCounts) {
+      announce('Scan finished. ' + lastCounts.well + ' models run well, ' + lastCounts.slow + ' slowly, ' + lastCounts.no + " won't run.");
+    }
+  }
+
   // ---------------------------------------------------------------- device plate
 
-  var OS_NAMES = { windows: 'Windows', mac: 'macOS', linux: 'Linux', android: 'Android', ios: 'iOS', ipados: 'iPadOS', chromeos: 'ChromeOS', other: 'Unknown OS' };
+  var OS_NAMES = { windows: 'Windows', mac: 'macOS', linux: 'Linux', android: 'Android', ios: 'iOS', ipados: 'iPadOS', chromeos: 'ChromeOS',
+    kaios: 'KaiOS', harmonyos: 'HarmonyOS', other: 'Unknown OS' };
 
   function deviceTitle(d) {
     var ua = d.ua;
     var os = OS_NAMES[ua.os] || 'Unknown OS';
-    var ff = ua.os === 'ios' ? 'iPhone' : (ua.os === 'ipados' ? 'iPad' : (ua.formFactor === 'phone' ? 'Android phone' : (ua.formFactor === 'tablet' ? 'Tablet' : 'Computer')));
+    var ff = ua.os === 'ios' ? 'iPhone' : (ua.os === 'ipados' ? 'iPad' : (ua.formFactor === 'phone' ? (ua.os === 'android' ? 'Android phone' : 'Phone') : (ua.formFactor === 'tablet' ? 'Tablet' : 'Computer')));
     if (ua.os === 'mac') { ff = 'Mac'; }
     if (ua.os === 'chromeos') { ff = 'Chromebook'; }
     var t = ff;
@@ -111,21 +164,33 @@
     return t;
   }
 
-  function conf(level) {
+  // A value the user entered is labelled as theirs, not as "detected".
+  function conf(level, source) {
+    if (source === 'user') { return '<span class="conf conf-user">you set</span>'; }
     var label = level === 'high' ? 'detected' : (level === 'medium' ? 'likely' : 'guess');
     return '<span class="conf conf-' + esc(level) + '">' + label + '</span>';
   }
 
-  function spec(label, valueHtml) {
-    return '<div class="spec"><dt>' + esc(label) + '</dt><dd>' + valueHtml + '</dd></div>';
+  function spec(label, valueHtml, hint) {
+    return '<div class="spec"><dt>' + esc(label) + '</dt><dd>' + valueHtml +
+      (hint ? '<span class="spec-hint">' + esc(hint) + '</span>' : '') + '</dd></div>';
   }
 
   function renderDevice(d, b) {
     current.device = d;
     current.budget = b;
+    current.all = null;
     if (!els.deviceBody) { return; }
+    // The plate's facts are re-rendered; the correction panel below them is built once per scan.
+    if (!$('plate-info') || !fixBuilt) {
+      els.deviceBody.innerHTML = '<div class="plate"><div id="plate-info"></div><div id="plate-fix"></div></div>';
+      $('plate-fix').innerHTML = fixBlock(d);
+      fixBuilt = true;
+    } else {
+      syncFix();
+    }
     var e = d.gpu.entry;
-    var html = '<div class="plate">';
+    var html = '';
     html += '<div class="plate-head"><div><div class="plate-title">' + esc(deviceTitle(d)) + '</div>' +
       '<div class="plate-sub">' + esc(d.ua.browser + (d.ua.browserVersion ? ' ' + d.ua.browserVersion : '')) + '</div></div>' +
       '<div class="plate-sub mono">' + esc(b.native.label) + '</div></div>';
@@ -133,58 +198,71 @@
     html += '<dl class="specs">';
     var cpuTxt = (d.cpu.cores ? d.cpu.cores + ' threads' : 'Cores hidden') + (d.cpu.arch ? ' · ' + (d.cpu.arch === 'arm' ? 'ARM' : 'x86-64') : '');
     if (d.cpu.score) { cpuTxt += ' · speed ' + U.round(d.cpu.score, 2) + '×'; }
-    html += spec('Processor', '<span class="val">' + esc(cpuTxt) + '</span>');
+    html += spec('Processor', '<span class="val">' + esc(cpuTxt) + '</span>', d.cpu.score ? 'Speed 1× = a typical 2020 laptop.' : '');
     html += spec('Memory (RAM)', '<span class="val">' + esc(U.fmtGB(d.memory.estimatedGB)) + '</span>' +
-      (d.memory.capped && d.memory.source === 'deviceMemory' ? ' <span class="plate-sub">or more</span>' : '') + conf(d.memory.confidence));
+      (d.memory.capped && d.memory.source === 'deviceMemory' ? ' <span class="plate-sub">or more</span>' : '') + conf(d.memory.confidence, d.memory.source));
     var gpuTxt = e ? e.name : (d.gpu.name || 'Not identified');
     var gpuSub = '';
     if (e) {
-      var memTxt = e.vramGB > 0 ? U.fmtGB(e.vramGB) + ' VRAM' : 'shared memory';
+      var memTxt = e.vramGB > 0 ? U.fmtGB(e.vramGB) + ' graphics memory (VRAM)' : 'shares the system memory';
       gpuSub = '<div class="val plate-sub">' + esc(memTxt + (e.bandwidthGBs ? ' · ' + Math.round(e.bandwidthGBs) + ' GB/s' : '')) + '</div>';
     }
-    html += spec('Graphics', esc(gpuTxt) + conf(e ? d.gpu.confidence : 'low') + gpuSub);
-    html += spec('WebGPU', esc(d.webgpu.available ? (d.webgpu.isFallback ? 'Software only' : 'Yes' + (d.webgpu.shaderF16 ? ', fp16' : ', no fp16')) : 'No'));
+    html += spec('Graphics', esc(gpuTxt) + conf(e ? d.gpu.confidence : 'low', d.gpu.source) + gpuSub,
+      e && e.bandwidthGBs ? 'GB/s = how fast it reads memory; AI speed mostly follows it.' : '');
+    html += spec('WebGPU', esc(d.webgpu.available ? (d.webgpu.isFallback ? 'Software only' : 'Yes' + (d.webgpu.shaderF16 ? ', with fast half-precision math' : ', without fast half-precision math')) : 'No'),
+      'Lets web pages use the graphics chip.');
     var nb = b.native;
-    var fast = nb.gpuMemGB > 0 ? U.fmtGB(nb.gpuMemGB) + (nb.unified ? ' usable by GPU' : ' usable VRAM') : U.fmtGB(nb.cpuMemGB) + ' usable RAM';
-    html += spec('Room for models', '<span class="val">' + esc(fast) + (nb.gpuMemGB > 0 && nb.cpuMemGB > 0 ? ' + ' + esc(U.fmtGB(nb.cpuMemGB)) + ' RAM' : '') + '</span>');
+    var fast = nb.gpuMemGB > 0 ? U.fmtGB(nb.gpuMemGB) + (nb.unified ? ' usable by the GPU' : ' graphics memory') : U.fmtGB(nb.cpuMemGB) + ' of RAM';
+    html += spec('Room for models', '<span class="val">' + esc(fast) + (nb.gpuMemGB > 0 && nb.cpuMemGB > 0 ? ' + ' + esc(U.fmtGB(nb.cpuMemGB)) + ' RAM' : '') + '</span>',
+      'What is left for a model after the system and other apps.');
     html += spec('In this browser', esc(b.browser.possible ? (b.browser.mode === 'webgpu' ? 'Up to ~' + U.fmtGB(b.browser.memGB) + ' via WebGPU' : 'Small models via WebAssembly') : 'Not supported'));
     html += '</dl>';
     if (d.builtInAI) {
       var aiTxt = { available: 'is ready to use', downloadable: 'is supported here (not downloaded yet)', downloading: 'is downloading', unavailable: 'is not supported on this device' }[d.builtInAI] || d.builtInAI;
-      html += '<p class="plate-sub" style="padding:12px 20px;border-top:1px solid var(--line)">Chrome\'s built-in Gemini Nano ' + esc(aiTxt) + '.</p>';
+      html += '<p class="plate-sub plate-note">Chrome\'s built-in Gemini Nano ' + esc(aiTxt) + '.</p>';
     }
-
-    html += askBlock(d);
 
     if (d.notes && d.notes.length) {
       html += '<ul class="notes">';
       for (var i = 0; i < d.notes.length; i++) { html += '<li>' + esc(d.notes[i]) + '</li>'; }
       html += '</ul>';
     }
-
-    html += fixBlock(d);
-    html += '</div>';
-    els.deviceBody.innerHTML = html;
+    $('plate-info').innerHTML = html;
     els.device.hidden = false;
+    if (els.scanSummary) { els.scanSummary.textContent = scanSummary(d); }
   }
 
-  // A one-click question when the browser hid the RAM amount.
+  // One line that stands in for the folded probe checklist.
+  function scanSummary(d) {
+    var e = d.gpu.entry;
+    var gpu = e ? e.name : (d.gpu.name || 'graphics chip not identified');
+    return 'Scanned: ' + deviceTitle(d) + ' · ' + gpu + ' · ' + U.fmtGB(d.memory.estimatedGB) + ' RAM';
+  }
+
+  // A one-click question when the browser hid the RAM amount. It sits with the results because
+  // the answer changes them; after an answer it stays, showing the choice.
   function askBlock(d) {
-    if (d.memory.source === 'user' || d.memory.confidence === 'high') { return ''; }
+    if (d.memory.source === 'user' ? !askShown : d.memory.confidence === 'high') { return ''; }
+    askShown = true;
     var picks = d.ua.formFactor === 'desktop' ? [8, 16, 24, 32, 48, 64, 96, 128] : [3, 4, 6, 8, 12, 16];
-    var h = '<div class="asks"><p>How much RAM does this device have? Your browser ' +
-      (d.memory.capped ? 'only reports "at least ' + esc(d.memory.reportedGB) + ' GB".' : 'does not say.') + ' Pick it to sharpen the results.</p><div class="ram-picks">';
+    var q = d.memory.source === 'user' ? 'Using the ' + esc(U.fmtGB(d.memory.estimatedGB)) + ' of RAM you picked.' :
+      'How much RAM does this device have? Your browser ' +
+      (d.memory.capped ? 'only reports "at least ' + esc(d.memory.reportedGB) + ' GB".' : 'does not say, so this assumes ' + esc(U.fmtGB(d.memory.estimatedGB)) + '.') + ' Pick it to sharpen the results.';
+    var h = '<div class="asks" role="group" aria-labelledby="ask-q"><p id="ask-q">' + q + '</p><div class="ram-picks">';
     for (var i = 0; i < picks.length; i++) {
-      var on = picks[i] === d.memory.estimatedGB;
+      var on = d.memory.source === 'user' && picks[i] === d.memory.estimatedGB;
       h += '<button type="button" class="chip" data-action="ram" data-gb="' + picks[i] + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + picks[i] + ' GB</button>';
     }
     h += '</div></div>';
     return h;
   }
 
+  function currentOverrides() { return U.storage.get('overrides') || {}; }
+
   function fixBlock(d) {
-    var ov = U.storage.get('overrides') || {};
-    var h = '<details class="fix"' + (d.gpu.confidence === 'low' ? ' open' : '') + '><summary>Correct the details</summary><div class="fix-body">';
+    var ov = currentOverrides();
+    var open = d.gpu.confidence === 'low' || !!(ov.ramGB || ov.gpuName);
+    var h = '<details class="fix" id="fix"' + (open ? ' open' : '') + '><summary>Correct the details</summary><div class="fix-body">';
     h += '<div class="field"><label for="ov-ram">Memory (RAM)</label><select id="ov-ram"><option value="">Use detected value</option>';
     for (var i = 0; i < RAM_OPTIONS.length; i++) {
       h += '<option value="' + RAM_OPTIONS[i] + '"' + (ov.ramGB === RAM_OPTIONS[i] ? ' selected' : '') + '>' + RAM_OPTIONS[i] + ' GB</option>';
@@ -195,6 +273,16 @@
     h += '<div class="fix-actions"><button type="button" class="btn" data-action="reset-ov">Reset to detected</button></div>';
     h += '</div></details>';
     return h;
+  }
+
+  // Keeps the (never rebuilt) dropdowns in step with corrections made elsewhere (RAM chips, Reset).
+  function syncFix() {
+    var ov = currentOverrides();
+    var r = $('ov-ram'), g = $('ov-gpu');
+    var rv = ov.ramGB ? String(ov.ramGB) : '';
+    var gv = ov.gpuName || '';
+    if (r && r.value !== rv) { r.value = rv; }
+    if (g && g.value !== gv) { g.value = gv; }
   }
 
   function gpuOptions(selected) {
@@ -225,27 +313,28 @@
     var t = ev.target;
     while (t && t !== els.deviceBody && !(t.getAttribute && t.getAttribute('data-action'))) { t = t.parentNode; }
     if (!t || t === els.deviceBody) { return; }
-    var action = t.getAttribute('data-action');
-    var ov = U.storage.get('overrides') || {};
-    if (action === 'ram') {
-      ov.ramGB = parseFloat(t.getAttribute('data-gb'));
-      emitOverride(ov);
-    } else if (action === 'reset-ov') {
+    if (t.getAttribute('data-action') === 'reset-ov') {
       emitOverride({});
+      announce('Corrections cleared; using the detected values.');
     }
   }
 
+  // Chromium on Windows and Linux fires 'change' on every arrow key in a closed select, so the
+  // recompute waits for a pause. The select itself is never rebuilt, so focus stays put.
+  var changeTimer = null;
   function onDeviceChange(ev) {
     var t = ev.target;
-    if (!t || !t.id) { return; }
-    var ov = U.storage.get('overrides') || {};
-    if (t.id === 'ov-ram') {
-      if (t.value) { ov.ramGB = parseFloat(t.value); } else { delete ov.ramGB; }
+    if (!t || (t.id !== 'ov-ram' && t.id !== 'ov-gpu')) { return; }
+    if (changeTimer) { clearTimeout(changeTimer); }
+    changeTimer = setTimeout(function () {
+      changeTimer = null;
+      var ov = currentOverrides();
+      var r = $('ov-ram'), g = $('ov-gpu');
+      if (r && r.value) { ov.ramGB = parseFloat(r.value); } else { delete ov.ramGB; }
+      if (g && g.value) { ov.gpuName = g.value; } else { delete ov.gpuName; }
       emitOverride(ov);
-    } else if (t.id === 'ov-gpu') {
-      if (t.value) { ov.gpuName = t.value; } else { delete ov.gpuName; }
-      emitOverride(ov);
-    }
+      if (lastCounts) { announce('Results updated: ' + lastCounts.well + ' run well, ' + lastCounts.slow + ' slowly, ' + lastCounts.no + " won't run."); }
+    }, 300);
   }
 
   function emitOverride(ov) {
@@ -278,14 +367,15 @@
     return list;
   }
 
+  // Classifies every model once per device/target; searching reuses the result.
   function computeAll() {
-    return LAC.estimate.classifyAll(LAC.MODELS || [], current.budget, state.target);
+    if (!current.all || current.all.target !== state.target) {
+      current.all = { target: state.target, list: LAC.estimate.classifyAll(LAC.MODELS || [], current.budget, state.target) };
+    }
+    return current.all.list;
   }
 
-  function renderResults(d, b) {
-    if (d) { current.device = d; }
-    if (b) { current.budget = b; }
-    if (!els.resultsBody || !current.budget) { return; }
+  function compute() {
     var all = computeAll();
     var browser = state.target === 'browser';
     var visible = [];
@@ -295,51 +385,106 @@
       visible.push(all[i]);
     }
     var counts = { well: 0, slow: 0, no: 0 };
-    for (var c = 0; c < visible.length; c++) { counts[visible[c].v.verdict]++; }
-
-    var mods = modsFor(state.filter);
-    var filtered = { well: [], slow: [], no: [] };
     var chipCounts = {};
     for (var k = 0; k < visible.length; k++) {
       var r = visible[k];
+      counts[r.v.verdict]++;
       for (var f = 0; f < FILTERS.length; f++) {
         var fm = FILTERS[f].mods;
         if (!fm || fm.indexOf(r.model.modality) >= 0) { chipCounts[FILTERS[f].id] = (chipCounts[FILTERS[f].id] || 0) + 1; }
       }
-      if (mods && mods.indexOf(r.model.modality) < 0) { continue; }
-      if (!matchesQuery(r.model, state.query)) { continue; }
-      filtered[r.v.verdict].push(r);
     }
-
-    var html = '';
-    html += headline(visible, counts);
-    html += verdictCards(counts);
-    html += picks(visible);
-    html += controls(chipCounts, unavailable, all.length);
-    html += '<div id="groups">' + groupsHtml(filtered) + '</div>';
-    els.resultsBody.innerHTML = html;
-    els.results.hidden = false;
+    // A saved filter whose chip is hidden in this view (no such models here) falls back to "All"
+    // for display only; the saved preference is kept for when its models come back.
+    var filter = state.filter !== 'all' && !chipCounts[state.filter] ? 'all' : state.filter;
+    var mods = modsFor(filter);
+    var filtered = { well: [], slow: [], no: [] };
+    for (var j = 0; j < visible.length; j++) {
+      var v = visible[j];
+      if (mods && mods.indexOf(v.model.modality) < 0) { continue; }
+      if (!matchesQuery(v.model, state.query)) { continue; }
+      filtered[v.v.verdict].push(v);
+    }
+    return { all: all, visible: visible, unavailable: unavailable, counts: counts, chipCounts: chipCounts, filter: filter, filtered: filtered };
   }
 
+  // Builds the parts of the results that must survive re-renders (the search box) once.
+  function ensureResultsFrame() {
+    if ($('q') && $('r-summary')) { return; }
+    els.resultsBody.innerHTML =
+      '<div id="r-view"></div>' +
+      '<div id="r-summary"></div>' +
+      '<div class="controls"><div class="grow"><label class="visually-hidden" for="q">Search models</label>' +
+      '<input type="search" id="q" placeholder="Search models, e.g. qwen, whisper, flux" autocomplete="off"></div>' +
+      '<div id="r-chips" class="chips" role="group" aria-label="Filter by type"></div></div>' +
+      '<p class="target-note" id="r-note"></p>' +
+      '<div id="groups"></div>';
+    var q = $('q');
+    q.value = state.query;
+    // Input events also fire mid-composition (Chinese/Japanese/Korean IMEs, Android keyboards);
+    // wait for the composed text before filtering.
+    q.addEventListener('compositionend', function () { state.query = q.value; scheduleGroups(); });
+  }
+
+  function renderResults(d, b) {
+    if (d) { current.device = d; }
+    if (b) { current.budget = b; current.all = null; }
+    if (!els.resultsBody || !current.budget) { return; }
+    ensureResultsFrame();
+    var c = compute();
+    var lg = $('legend');
+    if (lg) { legendOpen = !!lg.open; }
+
+    $('r-view').innerHTML = viewToggle();
+    var html = headline(c.visible, c.counts);
+    html += verdictCards(c.counts);
+    html += legend();
+    if (current.device) { html += askBlock(current.device) + gpuPrompt(current.device); }
+    html += picks(c.visible);
+    $('r-summary').innerHTML = html;
+    $('r-chips').innerHTML = chips(c.chipCounts, c.filter);
+    $('r-note').textContent = targetNote(c.unavailable, c.all.length);
+    $('groups').innerHTML = groupsHtml(c.filtered);
+    lastCounts = c.counts;
+    els.results.hidden = false;
+    return c;
+  }
+
+  var inputTimer = null;
+  function scheduleGroups() {
+    if (inputTimer) { clearTimeout(inputTimer); }
+    inputTimer = setTimeout(rerenderGroupsOnly, 150);
+  }
+
+  // Search only changes the lists; the search box and everything above it stay as they are.
   function rerenderGroupsOnly() {
-    // Re-render everything except the search box so typing keeps focus.
-    var box = document.getElementById('q');
-    var pos = box ? box.selectionStart : null;
-    renderResults();
-    var nb = document.getElementById('q');
-    if (nb && box) {
-      nb.focus();
-      try { if (pos !== null) { nb.setSelectionRange(pos, pos); } } catch (e) { /* ignore */ }
-    }
+    inputTimer = null;
+    if (!current.budget || !$('groups')) { return; }
+    var c = compute();
+    $('groups').innerHTML = groupsHtml(c.filtered);
+    announceFiltered(c.filtered);
+  }
+
+  function announceFiltered(f) {
+    announce('Showing ' + f.well.length + ' that run well, ' + f.slow.length + ' slowly, ' + f.no.length + " that won't run" +
+      (state.query ? ' for "' + state.query + '"' : '') + '.');
+  }
+
+  // Models a visitor can actually use for the job: not captioning-only models, and in the
+  // installed-app view not models that need a special fork of the runtime.
+  function usable(m) {
+    if (m.chat === false) { return false; }
+    if (state.target === 'native' && m.needsFork) { return false; }
+    return true;
   }
 
   function bestIn(list, mods, verdict) {
     var best = null;
+    var tierRank = { flagship: 2, popular: 1, niche: 0 };
     for (var i = 0; i < list.length; i++) {
       var r = list[i];
-      if (r.v.verdict !== verdict || mods.indexOf(r.model.modality) < 0) { continue; }
+      if (r.v.verdict !== verdict || mods.indexOf(r.model.modality) < 0 || !usable(r.model)) { continue; }
       if (!best) { best = r; continue; }
-      var tierRank = { flagship: 2, popular: 1, niche: 0 };
       var sa = (r.model.paramsB || 0) * (1 + 0.15 * (tierRank[r.model.tier] || 0));
       var sb = (best.model.paramsB || 0) * (1 + 0.15 * (tierRank[best.model.tier] || 0));
       if (sa > sb || (sa === sb && (r.model.release || '') > (best.model.release || ''))) { best = r; }
@@ -347,18 +492,29 @@
     return best;
   }
 
+  function bestOf(list, mods) { return bestIn(list, mods, 'well') || bestIn(list, mods, 'slow'); }
+
   function headline(list, counts) {
-    var chat = bestIn(list, ['text', 'reasoning', 'code', 'vision-language'], 'well') || bestIn(list, ['text', 'reasoning', 'code', 'vision-language'], 'slow');
+    var kind = 'chat model';
+    var chat = bestOf(list, PICKS[0].mods);
+    if (!chat) { chat = bestOf(list, ['reasoning', 'code']); kind = 'model'; }
     var where = state.target === 'browser' ? 'Right here in this browser' : 'With a free app installed';
     var s = '<p class="headline">' + esc(where) + ', this device runs <strong>' + counts.well + '</strong> of ' + (counts.well + counts.slow + counts.no) +
       ' models well and <strong>' + counts.slow + '</strong> slowly.';
     if (chat) {
-      s += ' The most capable chat model it handles ' + (chat.v.verdict === 'well' ? 'comfortably' : '(slowly)') + ' is <strong>' + esc(chat.model.name) + '</strong>' +
-        (chat.v.speed ? ' at ' + esc(speedText(chat.v.speed)) : '') + '.';
+      s += ' The most capable ' + kind + ' it handles ' + (chat.v.verdict === 'well' ? 'comfortably' : '(slowly)') + ' is <strong>' + esc(chat.model.name) + '</strong>' +
+        (chat.v.speed ? ' at ' + speedHtml(chat.v.speed) : '') + '.';
     } else {
       s += ' No chat model runs here' + (state.target === 'browser' ? '; try the installed-app view.' : '.');
     }
     return s + '</p>';
+  }
+
+  function viewToggle() {
+    return '<div class="view"><span class="view-label" id="view-label">Run models with</span>' +
+      '<div class="seg" role="group" aria-labelledby="view-label">' +
+      '<button type="button" data-action="target" data-target="native" aria-pressed="' + (state.target === 'native') + '">An installed app</button>' +
+      '<button type="button" data-action="target" data-target="browser" aria-pressed="' + (state.target === 'browser') + '">This browser</button></div></div>';
   }
 
   function verdictCards(counts) {
@@ -382,54 +538,67 @@
     return h;
   }
 
+  // Plain-words key to the units and names used in the lists, next to where they first appear.
+  function legend() {
+    return '<details class="legend" id="legend"' + (legendOpen ? ' open' : '') + '><summary>What the numbers mean</summary><dl>' +
+      '<div><dt>tok/s</dt><dd>Tokens per second, the writing speed. A token is about ¾ of a word. People read 4–6 words a second, so 10 tok/s or more feels quick.</dd></div>' +
+      '<div><dt>8B, 350M</dt><dd>Model size in billions (B) or millions (M) of parameters. Bigger is usually smarter but needs more memory.</dd></div>' +
+      '<div><dt>30B-A3B, “3B active”</dt><dd>A mixture-of-experts model: all 30B must fit in memory, but only 3B are used for each word, so it runs about as fast as a 3B model.</dd></div>' +
+      '<div><dt>4-bit, 8-bit</dt><dd>How compressed the download is. 4-bit, the usual download, is about a quarter of the full size with a small loss in quality.</dd></div>' +
+      '<div><dt>VRAM</dt><dd>A graphics card\'s own memory. It is much faster than normal RAM, so models that fit in it run fastest.</dd></div>' +
+      '<div><dt>× real time</dt><dd>For speech: 10× means an hour of audio takes about 6 minutes.</dd></div>' +
+      '</dl></details>';
+  }
+
+  // Points at the correction panel when the graphics chip is only a guess.
+  function gpuPrompt(d) {
+    if (d.gpu.source === 'user' || d.gpu.confidence !== 'low') { return ''; }
+    return '<p class="sharpen">The graphics chip is a guess. <a href="#fix" data-action="open-fix">Pick the right one</a> to sharpen the results.</p>';
+  }
+
   function picks(list) {
     var h = '';
     var n = 0;
     for (var i = 0; i < PICKS.length; i++) {
       var p = PICKS[i];
-      var r = bestIn(list, p.mods, 'well') || bestIn(list, p.mods, 'slow');
+      var r = bestOf(list, p.mods);
       if (!r) { continue; }
       n++;
       h += '<div class="pick"><div class="k">Best for ' + esc(p.label.toLowerCase()) + '</div><div class="m">' + esc(r.model.name) + '</div>' +
-        '<div class="s' + (r.v.verdict === 'slow' ? ' slow' : '') + '">' + esc(r.v.verdict === 'slow' ? 'Slow: ' : '') + esc(r.v.speed ? speedText(r.v.speed) : VERDICT_TEXT[r.v.verdict]) + '</div></div>';
+        '<div class="s' + (r.v.verdict === 'slow' ? ' slow' : '') + '">' + esc(r.v.verdict === 'slow' ? 'Slow: ' : '') + (r.v.speed ? speedHtml(r.v.speed) : esc(VERDICT_TEXT[r.v.verdict])) + '</div></div>';
     }
-    return n ? '<div class="picks" aria-label="Best picks for this device">' + h + '</div>' : '';
+    return n ? '<div class="picks" role="group" aria-label="Best picks for this device">' + h + '</div>' : '';
   }
 
-  function controls(chipCounts, unavailable, totalModels) {
-    var h = '<div class="controls">';
-    h += '<div class="seg" role="group" aria-label="Where the model runs">' +
-      '<button type="button" data-action="target" data-target="native" aria-pressed="' + (state.target === 'native') + '">Installed app</button>' +
-      '<button type="button" data-action="target" data-target="browser" aria-pressed="' + (state.target === 'browser') + '">In this browser</button></div>';
-    h += '<div class="grow"><label class="visually-hidden" for="q">Search models</label>' +
-      '<input type="search" id="q" placeholder="Search models, e.g. qwen, whisper, flux" value="' + esc(state.query) + '" autocomplete="off"></div>';
-    h += '</div>';
-    h += '<div class="chips" role="group" aria-label="Filter by type">';
+  function chips(chipCounts, filter) {
+    var h = '';
     for (var i = 0; i < FILTERS.length; i++) {
       var f = FILTERS[i];
       var cnt = chipCounts[f.id] || 0;
       if (!cnt && f.id !== 'all') { continue; }
-      h += '<button type="button" class="chip" data-action="filter" data-filter="' + f.id + '" aria-pressed="' + (state.filter === f.id) + '">' + esc(f.label) + '<span class="count">' + cnt + '</span></button>';
+      h += '<button type="button" class="chip" data-action="filter" data-filter="' + f.id + '" aria-pressed="' + (filter === f.id) + '">' + esc(f.label) + '<span class="count">' + cnt + '</span></button>';
     }
-    h += '</div>';
+    return h;
+  }
+
+  function targetNote(unavailable, totalModels) {
     var b = current.budget.browser;
-    var note = state.target === 'browser'
+    return state.target === 'browser'
       ? b.reason + ' Only models with a ready-made browser version are listed (' + (totalModels - unavailable) + ' of ' + totalModels + '). The first run downloads the model into browser storage.'
       : 'Assumes a free app: Ollama or LM Studio on a computer, PocketPal or Google AI Edge Gallery on a phone, ComfyUI or Draw Things for images. Speeds use the standard 4-bit download.';
-    h += '<p class="target-note">' + esc(note) + '</p>';
-    return h;
   }
 
   function groupsHtml(filtered) {
     var h = '';
     var keys = ['well', 'slow', 'no'];
+    var none = !filtered.well.length && !filtered.slow.length && !filtered.no.length;
     for (var i = 0; i < keys.length; i++) {
       var k = keys[i];
       var list = sortGroup(filtered[k], k);
       h += '<section class="group" id="g-' + k + '" aria-labelledby="gh-' + k + '"><div class="group-head"><span class="tag tag-' + k + '">' + VERDICT_TEXT[k] + '</span>' +
         '<h3 id="gh-' + k + '">' + groupTitle(k) + '</h3><span class="count">' + list.length + '</span></div>';
       if (!list.length) {
-        h += '<p class="empty">' + esc(emptyText(k)) + '</p>';
+        h += '<p class="empty">' + esc(emptyText(k, none)) + '</p>';
       } else {
         var limit = state.expanded[k] ? list.length : Math.min(list.length, LIMITS[k]);
         h += '<ul class="models">';
@@ -439,17 +608,23 @@
           h += '<button type="button" class="btn more" data-action="more" data-group="' + k + '">Show all ' + list.length + '</button>';
         }
       }
+      if (k === 'no' && state.target === 'browser') {
+        h += '<p class="empty switch">Many models that are not available in a browser run with an installed app. ' +
+          '<button type="button" class="btn" data-action="target" data-target="native">See installed-app results</button></p>';
+      }
       h += '</section>';
     }
     return h;
   }
 
   function groupTitle(k) {
+    if (k === 'no' && state.target === 'browser') { return 'Not in this browser'; }
     return k === 'well' ? 'Ready to use' : (k === 'slow' ? 'Usable with patience' : 'Out of reach on this device');
   }
 
-  function emptyText(k) {
+  function emptyText(k, none) {
     if (state.query) { return 'No models match your search here.'; }
+    if (none) { return 'No models of this type are listed here.'; }
     return k === 'well' ? 'Nothing in this category runs comfortably on this device.' :
       (k === 'slow' ? 'Nothing lands in between.' : 'Everything in this category fits.');
   }
@@ -460,6 +635,11 @@
     if (sp.unit === 'x realtime') { return (sp.value >= 10 ? Math.round(sp.value) : U.round(sp.value, 1)) + '× real time'; }
     var parts = sp.unit.split('/');
     return '~' + LAC.estimate.fmtSeconds(sp.value) + ' / ' + (parts[1] || 'run');
+  }
+
+  // speedText as HTML, with "tok/s" explained on hover (the legend explains it for touch).
+  function speedHtml(sp) {
+    return esc(speedText(sp)).replace('tok/s', '<abbr title="' + TOKS_TITLE + '">tok/s</abbr>');
   }
 
   function sizeText(m) {
@@ -478,47 +658,69 @@
 
   function modelRow(r) {
     var m = r.model, v = r.v;
-    var meta = [m.developer, sizeText(m), MOD_NAMES[m.modality] || m.modality, m.release].filter(function (x) { return !!x; }).join(' · ');
+    var modName = (m.chat === false && m.modality === 'vision-language') ? 'Vision (not chat)' : (MOD_NAMES[m.modality] || m.modality);
+    var meta = [m.developer, sizeText(m), modName, m.release].filter(function (x) { return !!x; }).join(' · ');
     var figs = '';
-    if (v.speed) { figs += '<span class="speed">' + esc(speedText(v.speed)) + '</span>'; }
+    if (v.speed) { figs += '<span class="speed">' + speedHtml(v.speed) + '</span>'; }
     if (v.memGB) { figs += '<span class="mem">needs ' + esc(U.fmtGB(v.memGB)) + '</span>'; }
-    var h = '<li class="model v-' + v.verdict + '"><div class="model-head"><span class="model-name">' + esc(m.name) + '</span> <span class="model-meta">' + esc(meta) + '</span></div>' +
+    // tabindex=-1 lets "Show all" move focus to the first newly shown row.
+    var h = '<li class="model v-' + v.verdict + '" tabindex="-1"><div class="model-head"><span class="model-name">' + esc(m.name) + '</span> <span class="model-meta">' + esc(meta) + '</span></div>' +
       '<div class="model-figs">' + figs + '</div>' +
       '<div class="model-foot"><span class="model-reason">' + esc(v.reason) + (v.q8 ? ' The higher-quality 8-bit build also runs well (' + esc(U.fmtRate(v.q8.tps)) + ').' : '') + '</span>' +
       (v.verdict !== 'no' ? howTo(m) : '') + '</div>';
     return h + '</li>';
   }
 
+  function link(href, text) {
+    return '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(text) + '</a>';
+  }
+
+  function copyCmd(cmd) {
+    return '<span class="cmd"><code>' + esc(cmd) + '</code><button type="button" data-action="copy" data-label="Copy" data-copy="' + esc(cmd) +
+      '" aria-label="Copy command: ' + esc(cmd) + '">Copy</button></span>';
+  }
+
+  // A sentence with links inside must stay one flex item, or .model-how splits it into pieces.
+  function sentence(html) { return '<span>' + html + '</span>'; }
+
   function howTo(m) {
     var d = current.device;
     var os = d ? d.ua.os : 'other';
+    var apple = os === 'ios' || os === 'ipados';
     var mobile = d && d.ua.formFactor !== 'desktop';
+    var find = 'then search "' + esc(m.family || m.name) + '" in the app';
     var parts = [];
     if (state.target === 'browser') {
-      if (m.browser && m.browser.webllm) {
-        parts.push('<a href="https://chat.webllm.ai/" target="_blank" rel="noopener">Open in WebLLM Chat</a> <span class="model-meta">(pick ' + esc(m.browser.webllm) + ')</span>');
+      var b = current.budget && current.budget.browser;
+      var build = m.browser && m.browser.webllm ? LAC.estimate.webllmBuild(m, !!(b && b.shaderF16)) : null;
+      if (build) {
+        parts.push(link('https://chat.webllm.ai/', 'Open in WebLLM Chat') + ' <span class="model-meta">(pick ' + esc(build.id) + ')</span>');
       } else if (m.browser && m.browser.tjs) {
-        parts.push('Runs with <a href="https://huggingface.co/docs/transformers.js" target="_blank" rel="noopener">Transformers.js</a>' + (m.browser.demo ? ' · <a href="' + esc(m.browser.demo) + '" target="_blank" rel="noopener">try the demo</a>' : ''));
+        parts.push(m.browser.demo ? link(m.browser.demo, 'Try it in the browser demo') :
+          sentence('No ready-made web page yet (developer library: ' + link('https://huggingface.co/docs/transformers.js', 'Transformers.js') + ')'));
       } else if (m.browser && m.browser.other) {
         parts.push(esc(m.browser.other));
       }
     } else if (m.kind === 'llm') {
       if (mobile) {
-        parts.push(os === 'ios' || os === 'ipados' ? 'Use PocketPal AI or Private LLM from the App Store' : 'Use PocketPal AI or Google AI Edge Gallery');
+        // KaiOS and HarmonyOS NEXT have no Google Play, so they get no store links.
+        parts.push(sentence(apple ? 'Get ' + link(APPS.pocketpalIos, 'PocketPal AI') + ' or ' + link(APPS.privateLlm, 'Private LLM') + ' from the App Store, ' + find :
+          (os === 'android' || os === 'other' ? 'Get ' + link(APPS.pocketpalAndroid, 'PocketPal AI') + ' or ' + link(APPS.edgeGallery, 'Google AI Edge Gallery') + ' from Google Play, ' + find :
+          'Look in your app store for an offline AI chat app, ' + find)));
       } else if (m.ollama) {
-        parts.push('<span class="cmd"><code>ollama run ' + esc(m.ollama) + '</code><button type="button" data-action="copy" data-copy="ollama run ' + esc(m.ollama) + '">Copy</button></span>');
+        parts.push(copyCmd('ollama run ' + m.ollama));
         parts.push('or search "' + esc(m.family || m.name) + '" in LM Studio');
       } else {
         parts.push('Search "' + esc(m.name) + '" in LM Studio');
       }
     } else if (m.kind === 'diffusion') {
-      parts.push(os === 'mac' || os === 'ios' || os === 'ipados' ? 'Use Draw Things (App Store) or ComfyUI' : 'Use ComfyUI');
+      parts.push(sentence(os === 'mac' || apple ? 'Use ' + link(APPS.drawThings, 'Draw Things') + ' (App Store) or ' + link(APPS.comfy, 'ComfyUI') : 'Use ' + link(APPS.comfy, 'ComfyUI')));
     } else if (m.modality === 'speech-to-text') {
-      parts.push(/whisper/i.test(m.name) ? 'Use whisper.cpp, or an app built on it' : 'See the model page for runtimes');
+      parts.push(/whisper/i.test(m.name) ? sentence('Use ' + link('https://github.com/ggml-org/whisper.cpp', 'whisper.cpp') + ', or an app built on it') : 'See the model page for apps that run it');
     } else if (m.ollama) {
-      parts.push('<span class="cmd"><code>ollama pull ' + esc(m.ollama) + '</code><button type="button" data-action="copy" data-copy="ollama pull ' + esc(m.ollama) + '">Copy</button></span>');
+      parts.push(copyCmd('ollama pull ' + m.ollama));
     }
-    if (m.source) { parts.push('<a href="' + esc(m.source) + '" target="_blank" rel="noopener">Model page</a>'); }
+    if (m.source) { parts.push(link(m.source, 'Model page')); }
     return parts.length ? '<span class="model-how">' + parts.join(' ') + '</span>' : '';
   }
 
@@ -527,38 +729,64 @@
     while (t && t !== els.resultsBody && !(t.getAttribute && t.getAttribute('data-action'))) { t = t.parentNode; }
     if (!t || t === els.resultsBody) { return; }
     var a = t.getAttribute('data-action');
+    var c;
     if (a === 'target') {
       state.target = t.getAttribute('data-target') === 'browser' ? 'browser' : 'native';
       state.expanded = { well: false, slow: false, no: false };
       saveView();
-      renderResults();
+      c = renderResults();
+      refocus('.seg [data-target="' + state.target + '"]');
+      if (c) { announceFiltered(c.filtered); }
     } else if (a === 'filter') {
       state.filter = t.getAttribute('data-filter');
       state.expanded = { well: false, slow: false, no: false };
       saveView();
-      renderResults();
+      c = renderResults();
+      refocus('[data-action="filter"][data-filter="' + state.filter + '"]');
+      if (c) { announceFiltered(c.filtered); }
     } else if (a === 'more') {
-      state.expanded[t.getAttribute('data-group')] = true;
+      var g = t.getAttribute('data-group');
+      state.expanded[g] = true;
       renderResults();
+      var rows = $('g-' + g) ? $('g-' + g).querySelectorAll('.model') : [];
+      if (rows[LIMITS[g]]) { rows[LIMITS[g]].focus(); }
+    } else if (a === 'ram') {
+      var gb = t.getAttribute('data-gb');
+      var ov = currentOverrides();
+      ov.ramGB = parseFloat(gb);
+      emitOverride(ov);
+      refocus('[data-action="ram"][data-gb="' + gb + '"]');
+    } else if (a === 'open-fix') {
+      var fix = $('fix');
+      if (fix) {
+        if (ev.preventDefault) { ev.preventDefault(); }
+        fix.open = true;
+        var sel = $('ov-gpu');
+        if (sel) {
+          if (sel.scrollIntoView) { sel.scrollIntoView(); }
+          sel.focus();
+        }
+      }
     } else if (a === 'copy') {
       copyText(t.getAttribute('data-copy'), t);
     }
   }
 
-  var inputTimer = null;
   function onResultsInput(ev) {
     var t = ev.target;
     if (!t || t.id !== 'q') { return; }
     state.query = t.value;
-    if (inputTimer) { clearTimeout(inputTimer); }
-    inputTimer = setTimeout(rerenderGroupsOnly, 150);
+    if (ev.isComposing) { return; }
+    scheduleGroups();
   }
 
   function copyText(text, btn) {
     function done(ok) {
-      var old = btn.textContent;
+      var label = btn.getAttribute('data-label') || 'Copy';
+      if (btn._t) { clearTimeout(btn._t); }
       btn.textContent = ok ? 'Copied' : 'Select & copy';
-      setTimeout(function () { btn.textContent = old; }, 1600);
+      announce(ok ? 'Copied to clipboard.' : 'Could not copy; the command is selected, press Ctrl+C or Cmd+C.');
+      btn._t = setTimeout(function () { btn.textContent = label; btn._t = null; }, 1600);
     }
     function fallback() {
       try {
@@ -606,11 +834,13 @@
     init: init,
     progress: progress,
     resetProgress: resetProgress,
+    scanDone: scanDone,
     renderDevice: renderDevice,
     renderResults: renderResults,
     onOverride: function (fn) { overrideHandler = fn; },
     onRescan: function (fn) { rescanHandler = fn; },
     showRescan: function (show) { if (els.rescan) { els.rescan.hidden = !show; } },
-    _speedText: speedText
+    _speedText: speedText,
+    _bestIn: bestIn
   };
 })(window.LAC = window.LAC || {});

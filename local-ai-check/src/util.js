@@ -62,14 +62,19 @@
   }
 
   var PREFIX = 'lac:';
+  // Values are also kept in memory, so a page whose localStorage is missing, blocked or throws
+  // (sandboxed frames, WebViews, private modes) still remembers them until it is closed.
+  var mem = {};
   var storage = {
     get: function (key) {
+      if (Object.prototype.hasOwnProperty.call(mem, key)) { return copy(mem[key]); }
       try {
         var raw = window.localStorage.getItem(PREFIX + key);
         return raw ? JSON.parse(raw) : null;
       } catch (e) { return null; }
     },
     set: function (key, value) {
+      mem[key] = value === undefined ? null : copy(value);
       try {
         if (value === null || value === undefined) { window.localStorage.removeItem(PREFIX + key); }
         else { window.localStorage.setItem(PREFIX + key, JSON.stringify(value)); }
@@ -77,6 +82,11 @@
       } catch (e) { return false; }
     }
   };
+
+  // Callers mutate what get() returns, so hand out copies of the in-memory value.
+  function copy(v) {
+    return v === null || typeof v !== 'object' ? v : JSON.parse(JSON.stringify(v));
+  }
 
   function extend(target) {
     for (var i = 1; i < arguments.length; i++) {

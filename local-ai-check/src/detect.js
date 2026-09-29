@@ -30,7 +30,7 @@
     else if (/CrOS/.test(ua)) { r.os = 'chromeos'; }
     else if (/Windows/.test(ua)) { r.os = 'windows'; }
     else if (/Macintosh|Mac OS X/.test(ua)) { r.os = 'mac'; }
-    else if (/Linux|X11/.test(ua)) { r.os = 'linux'; }
+    else if (/Linux|X11/i.test(ua)) { r.os = 'linux'; }
 
     if ((m = ua.match(/OS (\d+)[_.](\d+)/)) && (r.os === 'ios' || r.os === 'ipados')) { r.osVersion = m[1] + '.' + m[2]; }
     else if (r.os === 'android' && /Android 10; K\)/.test(ua)) { r.osVersion = ''; } // reduced UA: frozen at 10, real version comes from client hints
@@ -59,7 +59,7 @@
       [/Instagram (\d+)/, 'Instagram in-app browser'], [/FBAV\/(\d+)/, 'Facebook in-app browser'],
       [/musical_ly_(\d+)|BytedanceWebview\/(\d+)/, 'TikTok in-app browser'], [/GSA\/(\d+)/, 'Google app'],
       [/KAIOS\/(\d+(?:\.\d+)?)/i, 'KaiOS browser'], [/HuaweiBrowser\/(\d+)/, 'Huawei Browser'], [/ArkWeb\/(\d+)/, 'ArkWeb'],
-      [/EdgA?\/(\d+)/, 'Edge'], [/EdgiOS\/(\d+)/, 'Edge'], [/OPR\/(\d+)/, 'Opera'], [/SamsungBrowser\/(\d+)/, 'Samsung Internet'],
+      [/Edg(?:e|A)?\/(\d+)/, 'Edge'], [/EdgiOS\/(\d+)/, 'Edge'], [/OPR\/(\d+)/, 'Opera'], [/SamsungBrowser\/(\d+)/, 'Samsung Internet'],
       [/FxiOS\/(\d+)/, 'Firefox'], [/Firefox\/(\d+)/, 'Firefox'], [/CriOS\/(\d+)/, 'Chrome'], [/YaBrowser\/(\d+)/, 'Yandex Browser'],
       [/Vivaldi\/(\d+)/, 'Vivaldi'], [/Chrome\/(\d+)/, 'Chrome'], [/Version\/(\d+(?:\.\d+)?).*Safari/, 'Safari']
     ];
@@ -426,8 +426,9 @@
       if (/^(Inc|Ltd|Co|Corp)\.?$/i.test(s)) { s = ''; }
     }
     // "ANGLE Vulkan 1.3 (Samsung Xclipse 940 (0x…))" and "ANGLE Metal Renderer: Apple M3"
-    s = s.replace(/^ANGLE Vulkan [\d.]+ \((.*?)(?: \(0x[^)]*\))?\)?$/i, '$1').replace(/^ANGLE Metal Renderer:\s*/i, '');
+    s = s.replace(/^(?:ANGLE )?Vulkan [\d.]+ \((.*?)(?: \(0x[^)]*\))?\)?$/i, '$1').replace(/^ANGLE Metal Renderer:\s*/i, '');
     s = s.replace(/\s*\((TM|R)\)/gi, '').replace(/\s+/g, ' ');
+    if ((s.match(/\(/g) || []).length > (s.match(/\)/g) || []).length) { s += ')'; } // cut inside a nested "(…(0x…))"
     if (/^(webkit webgl|mozilla|generic renderer)$/i.test(s)) { return ''; }
     return s.replace(/^\s+|\s+$/g, '');
   }

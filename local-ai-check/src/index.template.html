@@ -8,7 +8,10 @@
 <meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<!-- Fonts are optional: media="print" keeps the stylesheet from blocking rendering and the
+     scripts (a stalled fonts.googleapis.com must not stall the page); onload switches it on. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap"></noscript>
 <!--STYLE-->
 </head>
 <body>
@@ -17,7 +20,7 @@
   <header class="masthead">
     <p class="eyebrow">Local AI compatibility check</p>
     <h1>Can it run local&nbsp;AI?</h1>
-    <p class="lede">This page inspects the device you are using right now and sorts today's open-weight AI models into three groups: the ones it runs well, the ones it runs slowly, and the ones it can't run. Everything happens in your browser. Nothing is uploaded.</p>
+    <p class="lede">This page checks the device you are using right now and sorts today's open-weight AI models into three groups: runs well, runs slowly, and won't run. It all happens in your browser; nothing is uploaded.</p>
   </header>
 
   <noscript>
@@ -26,36 +29,40 @@
     </div>
   </noscript>
 
+  <main id="main">
   <section class="scan" id="scan" aria-labelledby="scan-title">
     <div class="section-head">
-      <h2 id="scan-title">1 · Device scan</h2>
+      <h2 id="scan-title">Device scan</h2>
       <button type="button" class="btn btn-quiet" id="rescan" hidden>Scan again</button>
     </div>
-    <ol class="probes" id="probes" aria-live="polite">
-      <li class="probe" data-step="browser"><span class="dot" aria-hidden="true"></span><span class="probe-name">Browser &amp; system</span><span class="probe-detail">Waiting…</span></li>
-      <li class="probe" data-step="cpu"><span class="dot" aria-hidden="true"></span><span class="probe-name">Processor</span><span class="probe-detail">Waiting…</span></li>
-      <li class="probe" data-step="memory"><span class="dot" aria-hidden="true"></span><span class="probe-name">Memory (RAM)</span><span class="probe-detail">Waiting…</span></li>
-      <li class="probe" data-step="gpu"><span class="dot" aria-hidden="true"></span><span class="probe-name">Graphics chip</span><span class="probe-detail">Waiting…</span></li>
-      <li class="probe" data-step="webgpu"><span class="dot" aria-hidden="true"></span><span class="probe-name">WebGPU</span><span class="probe-detail">Waiting…</span></li>
-      <li class="probe" data-step="wasm"><span class="dot" aria-hidden="true"></span><span class="probe-name">WebAssembly</span><span class="probe-detail">Waiting…</span></li>
-      <li class="probe" data-step="storage"><span class="dot" aria-hidden="true"></span><span class="probe-name">Browser storage</span><span class="probe-detail">Waiting…</span></li>
-      <li class="probe" data-step="bench-cpu"><span class="dot" aria-hidden="true"></span><span class="probe-name">CPU speed test</span><span class="probe-detail">Waiting…</span></li>
-      <li class="probe" data-step="bench-gpu"><span class="dot" aria-hidden="true"></span><span class="probe-name">GPU speed test</span><span class="probe-detail">Waiting…</span></li>
-    </ol>
-  </section>
-
-  <section class="device" id="device" aria-labelledby="device-title" hidden>
-    <div class="section-head">
-      <h2 id="device-title">2 · Your device</h2>
-    </div>
-    <div id="device-body"></div>
+    <details class="scan-details" id="scan-details" open>
+      <summary><span class="scan-summary" id="scan-summary">Checking this device…</span><span class="scan-toggle" aria-hidden="true"></span></summary>
+      <ol class="probes" id="probes">
+        <li class="probe" data-step="browser"><span class="dot" aria-hidden="true"></span><span class="probe-name">Browser &amp; system</span><span class="probe-detail">Waiting…</span></li>
+        <li class="probe" data-step="cpu"><span class="dot" aria-hidden="true"></span><span class="probe-name">Processor</span><span class="probe-detail">Waiting…</span></li>
+        <li class="probe" data-step="memory"><span class="dot" aria-hidden="true"></span><span class="probe-name">Memory (RAM)</span><span class="probe-detail">Waiting…</span></li>
+        <li class="probe" data-step="gpu"><span class="dot" aria-hidden="true"></span><span class="probe-name">Graphics chip</span><span class="probe-detail">Waiting…</span></li>
+        <li class="probe" data-step="webgpu"><span class="dot" aria-hidden="true"></span><span class="probe-name">WebGPU</span><span class="probe-detail">Waiting…</span></li>
+        <li class="probe" data-step="wasm"><span class="dot" aria-hidden="true"></span><span class="probe-name">WebAssembly</span><span class="probe-detail">Waiting…</span></li>
+        <li class="probe" data-step="storage"><span class="dot" aria-hidden="true"></span><span class="probe-name">Browser storage</span><span class="probe-detail">Waiting…</span></li>
+        <li class="probe" data-step="bench-cpu"><span class="dot" aria-hidden="true"></span><span class="probe-name">CPU speed test</span><span class="probe-detail">Waiting…</span></li>
+        <li class="probe" data-step="bench-gpu"><span class="dot" aria-hidden="true"></span><span class="probe-name">GPU speed test</span><span class="probe-detail">Waiting…</span></li>
+      </ol>
+    </details>
   </section>
 
   <section class="results" id="results" aria-labelledby="results-title" hidden>
     <div class="section-head">
-      <h2 id="results-title">3 · What it can run</h2>
+      <h2 id="results-title">What it can run</h2>
     </div>
     <div id="results-body"></div>
+  </section>
+
+  <section class="device" id="device" aria-labelledby="device-title" hidden>
+    <div class="section-head">
+      <h2 id="device-title">Your device</h2>
+    </div>
+    <div id="device-body"></div>
   </section>
 
   <section class="method" id="method" aria-labelledby="method-title">
@@ -64,11 +71,13 @@
       <p>A language model writes one token (about ¾ of a word) at a time, and each token requires reading every active weight from memory once. Generation speed is therefore close to <em>memory bandwidth ÷ model size</em>. The check finds your memory size and bandwidth, adds room for the context cache and runtime, and compares that with each model's 4-bit download.</p>
     </div>
   </section>
+  </main>
 
   <footer class="colophon">
     <p>Model list current as of <span id="data-date">29 September 2026</span>. Speeds are estimates for a single user with a ~4,000-token context; real results vary with drivers, settings and other running apps.</p>
     <p>Private by design: this page runs entirely in your browser and sends nothing anywhere.</p>
   </footer>
+  <p id="sr-status" class="visually-hidden" role="status" aria-live="polite"></p>
 </div>
 <!--SCRIPTS-->
 </body>

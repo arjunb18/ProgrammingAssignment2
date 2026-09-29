@@ -29,6 +29,36 @@ const CASES = [
   ['ANGLE (Microsoft, Microsoft Basic Render Driver Direct3D11 vs_5_0 ps_5_0, D3D11)', null],
   ['Apple GPU', null],
   ['', null],
+  // Mobile-workstation GPUs contain the desktop card's name but have about half its VRAM.
+  ['ANGLE (NVIDIA, NVIDIA RTX 5000 Ada Generation Laptop GPU (0x000027BA) Direct3D11 vs_5_0 ps_5_0, D3D11)', 'NVIDIA RTX 5000 Ada Laptop'],
+  ['ANGLE (NVIDIA, NVIDIA RTX 2000 Ada Generation Laptop GPU (0x000028B8) Direct3D11 vs_5_0 ps_5_0, D3D11)', 'NVIDIA RTX 2000 Ada Laptop'],
+  ['ANGLE (NVIDIA, NVIDIA RTX A5000 Laptop GPU (0x000024B6) Direct3D11 vs_5_0 ps_5_0, D3D11)', 'NVIDIA RTX A5000 Laptop'],
+  ['ANGLE (NVIDIA, NVIDIA RTX A2000 Laptop GPU (0x000025B8) Direct3D11 vs_5_0 ps_5_0, D3D11)', /^NVIDIA RTX A2000 Laptop/],
+  ['ANGLE (NVIDIA, NVIDIA RTX PRO 5000 Blackwell Generation Laptop GPU (0x00002C38) Direct3D11 vs_5_0 ps_5_0, D3D11)', 'NVIDIA RTX PRO 5000 Blackwell Laptop'],
+  ['ANGLE (NVIDIA Corporation, NVIDIA RTX 4000 Ada Generation Laptop GPU/PCIe/SSE2, OpenGL 4.5.0 NVIDIA 550.54)', 'NVIDIA RTX 4000 Ada Laptop'],
+  ['ANGLE (NVIDIA, NVIDIA RTX 5000 Ada Generation (0x000026B2) Direct3D11 vs_5_0 ps_5_0, D3D11)', 'NVIDIA RTX 5000 Ada'],
+  // A laptop string that only a desktop entry matches gets a derived laptop entry, not the desktop VRAM.
+  ['ANGLE (NVIDIA, NVIDIA GeForce RTX 3090 Laptop GPU (0x00002000) Direct3D11 vs_5_0 ps_5_0, D3D11)', /laptop version/],
+  // Old GeForce laptop GPUs share model tokens with AMD APUs.
+  ['ANGLE (NVIDIA, NVIDIA GeForce GTX 780M Direct3D11 vs_5_0 ps_5_0, D3D11)', null],
+  ['ANGLE (NVIDIA, NVIDIA GeForce GTX 880M Direct3D11 vs_5_0 ps_5_0, D3D11)', null],
+  ['ANGLE (NVIDIA, NVIDIA GeForce GT 740M Direct3D11 vs_5_0 ps_5_0, D3D11)', null],
+  ['ANGLE (NVIDIA, NVIDIA GeForce GTX 680M Direct3D11 vs_5_0 ps_5_0, D3D11)', null],
+  ['ANGLE (AMD, AMD Radeon 780M Graphics (0x000015BF) Direct3D11 vs_5_0 ps_5_0, D3D11)', /780M/],
+  ['ANGLE (AMD, AMD Radeon 780M (radeonsi, gfx1103_r1, LLVM 17.0.6, DRM 3.57, 6.8.0), OpenGL 4.6 (Core Profile) Mesa 24.2.8)', /780M/],
+  ['ANGLE (AMD, AMD Radeon(TM) 8060S Graphics (0x00001586) Direct3D11 vs_5_0 ps_5_0, D3D11)', /8060S/],
+  // The PCI id only refines an unnumbered name: 880M and 890M share 0x150E.
+  ['ANGLE (AMD, AMD Radeon(TM) 880M Graphics (0x0000150E) Direct3D11 vs_5_0 ps_5_0, D3D11)', /880M/],
+  ['ANGLE (AMD, AMD Radeon(TM) 890M Graphics (0x0000150E) Direct3D11 vs_5_0 ps_5_0, D3D11)', /890M/],
+  ['ANGLE (AMD, AMD Radeon(TM) Graphics (0x0000150E) Direct3D11 vs_5_0 ps_5_0, D3D11)', /890M/],
+  ['ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001638) Direct3D11 vs_5_0 ps_5_0, D3D11)', /generic Ryzen APU/],
+  // Virtual machine GPUs are not real hardware.
+  ['ANGLE (VMware, Inc., SVGA3D; build: RELEASE; LLVM;, OpenGL 4.1)', null],
+  // Class entries used when a browser hides the model (selected by detect.js).
+  ['generic nvidia gpu', /^NVIDIA graphics card/],
+  ['generic amd gpu', /^AMD Radeon graphics/],
+  ['generic intel gpu', /^Intel graphics/],
+  ['generic intel mac', /^Intel Mac/],
 ];
 
 export default function test(assert) {
@@ -41,10 +71,19 @@ export default function test(assert) {
   }
   assert.equal(L.ramFromRenderer('Intel(R) Arc(TM) 140V GPU (16GB)'), 16, 'RAM from Lunar Lake renderer');
   assert.equal(L.ramFromRenderer('NVIDIA GeForce RTX 4070'), null, 'no RAM in ordinary renderer');
+  const lap = L.matchGpu('NVIDIA GeForce RTX 3090 Laptop GPU');
+  assert.ok(lap && lap.kind === 'discrete-laptop' && lap.vramGB === 12, `derived laptop entry halves the 24 GB desktop VRAM (${lap && lap.vramGB})`);
   // Table sanity.
   for (const g of L.GPUS) {
     assert.ok(g.bandwidthGBs > 0, `${g.name} has bandwidth`);
     assert.ok(/^(discrete-desktop|discrete-laptop|integrated|apple-silicon|mobile-soc|datacenter)$/.test(g.kind), `${g.name} kind`);
     if (g.kind.startsWith('discrete') || g.kind === 'datacenter') assert.ok(g.vramGB > 0, `${g.name} has VRAM`);
+    // Bare APU tokens ("780m") would also match GeForce laptop names.
+    if (g.vendor === 'amd' && g.kind === 'integrated') for (const m of g.match) assert.ok(!/^\d{3,4}[ms]$/.test(m), `${g.name}: match "${m}" needs the radeon prefix`);
+  }
+  // Every entry is reachable through its own match strings.
+  for (const g of L.GPUS) for (const m of g.match) {
+    const e = L.matchGpu(m);
+    assert.ok(e === g, `"${m}" reaches ${g.name} (got ${e && e.name})`);
   }
 }

@@ -4,7 +4,8 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DIFFUSION, SPEECH, WEBLLM, BROWSER_OTHER, DROP, NOT_CHAT, NEEDS_FORK, GPU_EXTRA_MATCH, kindFor } from './curation.mjs';
+import { DIFFUSION, SPEECH, WEBLLM, BROWSER_OTHER, DROP, NOT_CHAT, NEEDS_FORK, kindFor } from './curation.mjs';
+import { GPU_EXTRA_MATCH, GPU_LEADING, GPU_GENERIC, GPU_FAMILY, curateGpuMatch } from './gpu-curation.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const research = (name) => {
@@ -105,25 +106,26 @@ for (const [re] of DIFFUSION) if (!models.some((m) => re.test(m.name))) warn(`di
 
 // ------------------------------------------------------------------ GPUs
 const gpuCat = research('gpu-table');
-const gpus = [];
+// Curated entries that must win over the researched ones (e.g. workstation laptop GPUs whose
+// names contain the desktop card's name) go first.
+const gpus = GPU_LEADING.map((g) => ({ ...g, match: [...g.match] }));
 for (const g of gpuCat.gpus) {
-  const match = (g.match || []).map((s) => s.toLowerCase().trim()).filter(Boolean);
+  let match = (g.match || []).map((s) => s.toLowerCase().trim()).filter(Boolean);
+  match = curateGpuMatch(g, match);
   for (const [re, extra] of GPU_EXTRA_MATCH) if (re.test(g.name)) match.push(...extra);
   // Safari's fixed "Apple GPU" string says nothing about the chip; detect.js handles it per OS.
   if (match.length === 1 && match[0] === 'apple gpu') continue;
   if (!match.length) { warn(`GPU ${g.name} has no match strings`); continue; }
-  gpus.push({
+  const entry = {
     match, name: g.name.replace(/\s+/g, ' ').trim(), vendor: g.vendor, kind: g.kind,
     vramGB: round(g.vram_gb, 1) || 0, unifiedOptionsGB: g.unified_mem_options_gb || [],
     bandwidthGBs: round(g.bandwidth_gbs, 0), fp16Tflops: round(g.fp16_tflops, 2) || 0, year: g.year || 0,
-  });
+  };
+  if (GPU_FAMILY.some((re) => re.test(entry.name))) entry.family = true;
+  gpus.push(entry);
 }
 // Generic entries for devices whose browsers hide the chip (Safari on iPhone/iPad/Mac, Firefox buckets).
-gpus.push(
-  { match: ['generic iphone'], name: 'iPhone (chip hidden by the browser)', vendor: 'apple', kind: 'mobile-soc', vramGB: 0, unifiedOptionsGB: [6, 8, 12], bandwidthGBs: 51, fp16Tflops: 1.8, year: 0, generic: true },
-  { match: ['generic ipad'], name: 'iPad (chip hidden by the browser)', vendor: 'apple', kind: 'mobile-soc', vramGB: 0, unifiedOptionsGB: [8, 4, 6, 16], bandwidthGBs: 68, fp16Tflops: 2.6, year: 0, generic: true },
-  { match: ['generic apple silicon mac'], name: 'Apple silicon Mac (chip hidden by the browser)', vendor: 'apple', kind: 'apple-silicon', vramGB: 0, unifiedOptionsGB: [16, 8, 24, 32], bandwidthGBs: 100, fp16Tflops: 3.6, year: 0, generic: true },
-);
+gpus.push(...GPU_GENERIC);
 // Match strings shadowed by an earlier, more general entry would never be reached.
 for (let i = 0; i < gpus.length; i++) {
   for (const s of gpus[i].match) {

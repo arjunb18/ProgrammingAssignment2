@@ -154,8 +154,3 @@ export function kindFor(modality) {
     default: return 'llm';
   }
 }
-
-// Extra renderer spellings for GPU table entries (entry name regex → additional match strings).
-export const GPU_EXTRA_MATCH = [
-  [/^Intel Iris Xe Graphics$/, ['xe graphics']], // Linux Mesa: "Mesa Intel(R) Xe Graphics (TGL GT2)"
-];

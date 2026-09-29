@@ -25,22 +25,59 @@
     }
   }
 
-  // Maps a WebGL renderer / WebGPU description string to a GPUS entry, or null.
-  LAC.matchGpu = function (str) {
-    if (!str) { return null; }
-    var raw = String(str).toLowerCase();
-    if (/swiftshader|llvmpipe|softpipe|basic render|microsoft basic|software rasterizer/.test(raw)) { return null; }
-    var norm = normalise(str);
-    var pci = raw.match(/0x0000([0-9a-f]{4})/);
-    if (pci && PCI_IDS[pci[1]]) { norm = norm + ' ' + PCI_IDS[pci[1]]; }
+  // The PC GPU maker a renderer string names, when it names exactly one ('' otherwise). Keeps a
+  // "GeForce GTX 780M" from matching the "Radeon 780M" entry through a shared model token.
+  function pcVendor(s) {
+    var found = [];
+    if (/nvidia|geforce|quadro/.test(s)) { found.push('nvidia'); }
+    if (/\bamd\b|radeon|\bati\b/.test(s)) { found.push('amd'); }
+    if (/intel/.test(s)) { found.push('intel'); }
+    return found.length === 1 ? found[0] : '';
+  }
+
+  function findEntry(norm, raw) {
+    var vendor = pcVendor(raw);
     for (var i = 0; i < LAC.GPUS.length; i++) {
       var g = LAC.GPUS[i];
+      if (vendor && vendor !== g.vendor && (g.vendor === 'nvidia' || g.vendor === 'amd' || g.vendor === 'intel')) { continue; }
       for (var j = 0; j < g.match.length; j++) {
         var m = g.match[j];
         if (containsToken(norm, normalise(m)) || containsToken(raw, m)) { return g; }
       }
     }
     return null;
+  }
+
+  // "RTX A5000 Laptop GPU" style strings that only matched the desktop card: the laptop part has
+  // about half the VRAM and a narrower, slower memory bus. Returned as a derived entry.
+  function laptopVariant(g) {
+    var out = {};
+    for (var k in g) { if (Object.prototype.hasOwnProperty.call(g, k)) { out[k] = g[k]; } }
+    out.match = [];
+    out.name = g.name + ' (laptop version, estimated)';
+    out.kind = 'discrete-laptop';
+    out.vramGB = Math.max(4, Math.floor(g.vramGB / 2));
+    out.bandwidthGBs = Math.round(g.bandwidthGBs * 0.7);
+    out.fp16Tflops = Math.round(g.fp16Tflops * 6) / 10;
+    out.laptopGuess = true;
+    return out;
+  }
+
+  // Maps a WebGL renderer / WebGPU description string to a GPUS entry, or null.
+  LAC.matchGpu = function (str) {
+    if (!str) { return null; }
+    var raw = String(str).toLowerCase();
+    if (/swiftshader|llvmpipe|softpipe|basic render|microsoft basic|software rasterizer|svga3d|virgl/.test(raw)) { return null; }
+    var norm = normalise(str);
+    var g = findEntry(norm, raw);
+    // The PCI device id only refines a name without a model number ("AMD Radeon(TM) Graphics");
+    // an explicit name wins, since chips of one die share an id (880M and 890M are both 0x150E).
+    var pci = raw.match(/0x0000([0-9a-f]{4})/);
+    if (pci && PCI_IDS[pci[1]] && (!g || g.family)) {
+      g = findEntry(norm + ' ' + PCI_IDS[pci[1]], raw) || g;
+    }
+    if (g && g.kind === 'discrete-desktop' && /\blaptop\b/.test(norm)) { g = laptopVariant(g); }
+    return g;
   };
 
   // "Intel Arc 140V GPU (16GB)" style strings reveal the system RAM.

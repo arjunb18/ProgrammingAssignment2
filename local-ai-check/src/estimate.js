@@ -263,37 +263,38 @@
   function canUse(target) { return target === 'browser' ? 'this browser tab can use' : 'this device can use'; }
 
   // Pools a model can use for a given target, fast first:
-  // [{ memGB, bwGBs, tflops, prefillTflops, overheadS, name, kind, vendor, physGB, spill }].
-  // `tflops` caps generation and sizes diffusion; `prefillTflops` is what reads the prompt
-  // (llama.cpp on an Intel/AMD iGPU laptop reads it on the CPU cores).
+  // [{ memGB, bwGBs, tflops, batchTflops, overheadS, name, kind, vendor, physGB, spill }].
+  // `tflops` caps generation and sizes diffusion; `batchTflops` is what mainstream runtimes get
+  // for batch work such as reading the prompt or speech encoders (llama.cpp, whisper.cpp and
+  // kokoro-onnx on an Intel/AMD integrated-graphics laptop use the CPU cores).
   function pools(budget, target) {
     if (target === 'browser') {
       var b = budget.browser;
       if (!b.possible) { return []; }
-      return [{ memGB: b.memGB, bwGBs: b.bwGBs, tflops: b.tflops, prefillTflops: b.tflops,
+      return [{ memGB: b.memGB, bwGBs: b.bwGBs, tflops: b.tflops, batchTflops: b.tflops,
         overheadS: b.mode === 'webgpu' ? TOKEN_OVERHEAD_S.other : 0,
         name: 'this browser', kind: b.mode }];
     }
     var n = budget.native;
     var out = [];
     if (n.gpuMemGB > 0) {
-      out.push({ memGB: n.gpuMemGB, bwGBs: n.gpuBwGBs * EFF.gpuBw, tflops: n.gpuTflops, prefillTflops: n.gpuTflops,
+      out.push({ memGB: n.gpuMemGB, bwGBs: n.gpuBwGBs * EFF.gpuBw, tflops: n.gpuTflops, batchTflops: n.gpuTflops,
         overheadS: n.vendor === 'nvidia' ? TOKEN_OVERHEAD_S.nvidia : TOKEN_OVERHEAD_S.other,
         name: n.unified ? 'unified memory' : 'graphics memory (VRAM)', kind: 'gpu', vendor: n.vendor,
         physGB: n.unified ? n.gpuMemGB : n.vramGB });
       // Macs: what does not fit the GPU's share runs on the CPU cores from the rest of RAM.
       if (n.unified && !n.mobile && n.spillGB > 0.5) {
-        out.push({ memGB: n.spillGB, bwGBs: n.spillBwGBs * EFF.cpuBw, tflops: n.cpuTflops, prefillTflops: n.cpuTflops,
-          overheadS: 0, name: 'the rest of unified memory', kind: 'cpu', spill: true });
+        out.push({ memGB: n.spillGB, bwGBs: n.spillBwGBs * EFF.cpuBw, tflops: n.cpuTflops, batchTflops: n.cpuTflops,
+          overheadS: 0, name: 'the rest of memory (CPU side)', kind: 'cpu', spill: true });
       }
     }
     if (n.cpuMemGB > 0 && !(n.unified && n.gpuMemGB > 0)) {
       if (n.mobile) {
         var mt = Math.max(n.cpuTflops, n.gpuTflops * 3);
-        out.push({ memGB: n.cpuMemGB, bwGBs: n.cpuBwGBs * n.cpuEff, tflops: mt, prefillTflops: mt, overheadS: 0, name: 'phone memory', kind: 'mobile' });
+        out.push({ memGB: n.cpuMemGB, bwGBs: n.cpuBwGBs * n.cpuEff, tflops: mt, batchTflops: mt, overheadS: 0, name: 'phone memory', kind: 'mobile' });
       } else {
         out.push({ memGB: n.cpuMemGB, bwGBs: n.cpuBwGBs * n.cpuEff, tflops: Math.max(n.cpuTflops, n.unified ? n.gpuTflops * 0.5 : 0),
-          prefillTflops: n.cpuTflops, overheadS: 0, name: 'system memory (RAM)', kind: 'cpu' });
+          batchTflops: n.cpuTflops, overheadS: 0, name: 'system memory (RAM)', kind: 'cpu' });
       }
     }
     return out;
@@ -314,10 +315,10 @@
     var fast = ps[0];
     // Reading a 1,000-token prompt costs 2 × active params × 1000 FLOP (= 2 × activeB TFLOP);
     // the first pool reads it (llama.cpp streams offloaded layers through the GPU for this).
-    var prefillS = 2 * activeB / Math.max(0.005, num(fast.prefillTflops, fast.tflops) * EFF.prefill);
+    var prefillS = 2 * activeB / Math.max(0.005, num(fast.batchTflops, fast.tflops) * EFF.prefill);
     var placement, secPerTok, where;
     if (need <= fast.memGB) {
-      placement = fast.kind === 'cpu' ? 'cpu' : 'gpu';
+      placement = (fast.kind === 'cpu' || fast.kind === 'wasm') ? 'cpu' : 'gpu';
       where = fast.name;
       secPerTok = tokenGB / Math.max(0.1, fast.bwGBs) + num(fast.overheadS, 0);
       secPerTok = Math.max(secPerTok, gflopPerTok / Math.max(1, fast.tflops * 1000 * 0.5));
@@ -325,7 +326,7 @@
       var slow = ps[1];
       var fastShare = Math.max(0, fast.memGB - 0.3) / need;
       placement = 'split';
-      where = fast.name + ' plus ' + slow.name;
+      where = slow.spill ? fast.name + ' (a small part on the CPU)' : fast.name + ' plus ' + slow.name;
       secPerTok = fastShare * tokenGB / Math.max(0.1, fast.bwGBs) + num(fast.overheadS, 0) +
         (1 - fastShare) * tokenGB / Math.max(0.1, slow.bwGBs);
       secPerTok = Math.max(secPerTok, (1 - fastShare) * gflopPerTok / Math.max(1, slow.tflops * 1000 * 0.5));
@@ -484,7 +485,7 @@
     }
     return {
       verdict: best.v, precision: null, memGB: best.need,
-      placement: best.offload ? 'split' : (best.pool.kind === 'cpu' ? 'cpu' : 'gpu'),
+      placement: best.offload ? 'split' : ((best.pool.kind === 'cpu' || best.pool.kind === 'wasm') ? 'cpu' : 'gpu'),
       speed: { value: best.secs, unit: 's/' + unitWord }, reason: reason
     };
   }
@@ -520,7 +521,7 @@
       var pool = ps[i];
       if (pool.spill || need > pool.memGB) { continue; }
       var decodeSec = tokPerAudioSec * decB * (w / Math.max(0.01, num(m.paramsB, 0.5))) / Math.max(0.1, pool.bwGBs);
-      var encSec = encTflop / Math.max(0.005, pool.tflops * computeEff(pool, budget));
+      var encSec = encTflop / Math.max(0.005, num(pool.batchTflops, pool.tflops) * computeEff(pool, budget));
       var rtf = 1 / Math.max(1e-6, decodeSec + encSec);
       var v = rateVerdict(rtf, t, true);
       if (!best || rtf > best.rtf) { best = { v: v, rtf: rtf, pool: pool }; }
@@ -537,7 +538,7 @@
       ? 'Processes only about ' + x + '× real time, which is too slow to be practical.'
       : 'Handles ' + what + ' at about ' + x + '× real time' + (best.v === 'slow' ? ', so expect to wait.' : '.');
     return {
-      verdict: best.v, precision: p, memGB: need, placement: best.pool.kind === 'cpu' ? 'cpu' : 'gpu',
+      verdict: best.v, precision: p, memGB: need, placement: (best.pool.kind === 'cpu' || best.pool.kind === 'wasm') ? 'cpu' : 'gpu',
       speed: { value: best.rtf, unit: 'x realtime' }, reason: reason
     };
   }

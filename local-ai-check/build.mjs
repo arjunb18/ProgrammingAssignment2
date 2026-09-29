@@ -49,6 +49,14 @@ export function build() {
     .replace(/<body[^>]*>\s*/i, '')
     .replace(/<\/body>\s*/i, '');
 
+  // The font stylesheet must stay non-blocking in both outputs (media="print" + onload swap),
+  // or a stalled fonts.googleapis.com holds back the whole page.
+  for (const [name, html] of [['docs/index.html', full], ['dist/artifact.html', artifact]]) {
+    if (!/<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com[^>]*media="print" onload="this\.media='all'">/.test(html)) {
+      throw new Error(`${name}: the Google Fonts link lost its non-blocking media/onload attributes`);
+    }
+  }
+
   mkdirSync(join(root, '..', 'docs'), { recursive: true });
   mkdirSync(join(root, 'dist'), { recursive: true });
   writeFileSync(join(root, '..', 'docs', 'index.html'), full);

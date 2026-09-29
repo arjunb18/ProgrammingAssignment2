@@ -3,7 +3,7 @@
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 const require = createRequire(import.meta.url);
 function loadPlaywright() {
@@ -70,31 +70,49 @@ export const SCENARIOS = [
     init: ["Object.defineProperty(window, 'localStorage', { get: function () { throw new Error('denied'); } });", removeNav('gpu'), removeNav('clipboard'), removeNav('storage')],
   },
   { name: 'narrow 320 px phone', viewport: { width: 320, height: 640 }, ua: ANDROID_UA, mobile: true, init: [setNav('deviceMemory', 4), removeNav('gpu')] },
+  {
+    name: 'HarmonyOS NEXT phone (ArkWeb)', viewport: { width: 390, height: 844 }, mobile: true,
+    ua: 'Mozilla/5.0 (Phone; OpenHarmony 5.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 ArkWeb/4.1.6.1 Mobile',
+    init: [removeNav('gpu')],
+    // The plate must name the real OS, not "Android phone" or "Unknown OS".
+    expect: { gpuText: 'Phone · HarmonyOS 5.0' },
+  },
 ];
 
-export async function runScenario(browser, sc, opts = {}) {
+export async function runScenario(browser, sc, opts = {}, assert = null) {
   const ctx = await browser.newContext({ viewport: sc.viewport, userAgent: sc.ua, isMobile: !!sc.mobile, hasTouch: !!sc.mobile, colorScheme: opts.colorScheme || 'light' });
   const p = await ctx.newPage();
   const errors = [];
   p.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
   p.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push('console: ' + m.text()); });
   for (const s of sc.init) await p.addInitScript(s);
-  // Fonts are optional; don't let a blocked network slow the test.
-  await p.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
-  await p.goto(page);
+  // Fonts are optional. The requests hang (never answer), as on networks that silently drop
+  // Google Fonts: the page must still scan and render, so the font stylesheet may not block it.
+  // Screenshots wait for document.fonts, so a run that takes one aborts the requests instead.
+  if (opts.screenshot) await p.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
+  else await p.route(/fonts\.(googleapis|gstatic)\.com/, () => {});
+  await p.goto(page, { waitUntil: 'domcontentloaded' });
   let finished = true;
   try { await p.waitForSelector('#results:not([hidden]) .vcard', { timeout: 15000 }); }
   catch (e) { finished = false; }
   const info = await p.evaluate(() => {
     const n = (sel) => { const el = document.querySelector(sel); return el ? el.textContent : ''; };
     const counts = Array.prototype.map.call(document.querySelectorAll('.vcard .n'), (e) => parseInt(e.textContent, 10));
+    const card = document.querySelector('.vcard');
     return {
       counts,
+      // bottom edge of the verdict counts, relative to the first screen
+      cardsBottom: card ? card.getBoundingClientRect().bottom + window.scrollY : 1e9,
+      headlineTop: document.querySelector('.headline') ? document.querySelector('.headline').getBoundingClientRect().top + window.scrollY : 1e9,
+      viewportH: window.innerHeight,
+      scanCollapsed: !document.getElementById('scan-details').open,
+      rescanHidden: document.getElementById('rescan').hidden,
       plate: n('#device-body'),
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       probes: Array.prototype.map.call(document.querySelectorAll('.probe'), (li) => li.getAttribute('data-status') + ':' + li.querySelector('.probe-detail').textContent),
     };
   });
+  if (opts.after) await opts.after(p, assert);
   if (opts.screenshot) await p.screenshot({ path: opts.screenshot, fullPage: !!opts.fullPage });
   await ctx.close();
   return { finished, errors, ...info };
@@ -104,11 +122,23 @@ export default async function test(assert) {
   const pw = loadPlaywright();
   if (!pw) { console.log('    (Playwright not installed; skipping e2e)'); return; }
   if (!existsSync(fileURLToPath(page))) { assert.fail('docs/index.html missing; run node build.mjs'); return; }
+  const artifact = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'artifact.html');
+  if (existsSync(artifact)) {
+    const a = readFileSync(artifact, 'utf8');
+    assert.ok(!/<(html|head|body)[\s>]/i.test(a), 'artifact.html has no document wrapper');
+    assert.ok(/media="print" onload="this\.media='all'">/.test(a) && /<noscript><link rel="stylesheet"/.test(a), 'artifact.html keeps the non-blocking font link and its noscript fallback');
+  }
   const browser = await pw.chromium.launch();
   try {
     for (const sc of SCENARIOS) {
       const r = await runScenario(browser, sc);
-      assert.ok(r.finished, `${sc.name}: results rendered`);
+      assert.ok(r.finished, `${sc.name}: results rendered (font requests hanging)`);
+      // The answer is on the first screen: the whole verdict row on screens at least 760 px tall,
+      // at least the headline sentence on shorter ones.
+      if (r.viewportH >= 760) assert.ok(r.cardsBottom <= r.viewportH, `${sc.name}: verdict counts on the first screen (bottom ${Math.round(r.cardsBottom)} > ${r.viewportH})`);
+      else assert.ok(r.headlineTop + 48 <= r.viewportH, `${sc.name}: headline starts on the first screen (top ${Math.round(r.headlineTop)}, screen ${r.viewportH})`);
+      assert.ok(r.scanCollapsed, `${sc.name}: scan checklist folded after the scan`);
+      assert.ok(!r.rescanHidden, `${sc.name}: "Scan again" shown after the scan`);
       assert.ok(r.errors.length === 0, `${sc.name}: no errors (${r.errors.join(' | ')})`);
       assert.ok(r.overflow <= 0, `${sc.name}: no horizontal scroll (overflow ${r.overflow}px)`);
       const total = (r.counts || []).reduce((a, b) => a + b, 0);
@@ -117,7 +147,122 @@ export default async function test(assert) {
       if (sc.expect && sc.expect.minWell) assert.ok(r.counts[0] >= sc.expect.minWell, `${sc.name}: at least ${sc.expect.minWell} run well (got ${r.counts[0]})`);
       console.log(`    ${sc.name}: well/slow/no = ${r.counts.join('/')}`);
     }
+    await interactionTests(browser, assert);
   } finally {
     await browser.close();
   }
+}
+
+const pick = (prefix) => SCENARIOS.find((s) => s.name.startsWith(prefix));
+const active = (p) => p.evaluate(() => { const a = document.activeElement; return a ? (a.id || a.getAttribute('data-filter') || a.getAttribute('data-target') || a.getAttribute('data-gb') || a.tagName) : ''; });
+
+// A Windows PC whose browser exposes WebGPU with shader-f16, so WebLLM models are offered.
+const WEBGPU_PC = {
+  name: 'Windows PC with WebGPU (GTX 1060)', viewport: { width: 1280, height: 900 }, ua: WIN_UA,
+  init: [
+    fakeWebGL('ANGLE (NVIDIA, NVIDIA GeForce GTX 1060 6GB Direct3D11 vs_5_0 ps_5_0, D3D11)', 'Google Inc. (NVIDIA)'), setNav('deviceMemory', 16),
+    "window.GPUBufferUsage = { STORAGE: 128 }; Object.defineProperty(Navigator.prototype, 'gpu', { configurable: true, get: function () { return { requestAdapter: function () { return Promise.resolve({ limits: { maxBufferSize: 2147483648, maxStorageBufferBindingSize: 1073741824 }, features: new Set(['shader-f16']), info: { vendor: 'nvidia', architecture: 'pascal', device: '', description: '' }, requestDevice: function () { return new Promise(function () {}); } }); } }; } });",
+  ],
+};
+
+async function interactionTests(browser, assert) {
+  // Page structure and landmarks.
+  await runScenario(browser, pick('Windows gaming'), { after: async (p) => {
+    const s = await p.evaluate(() => ({
+      main: !!document.querySelector('main #results'),
+      status: !!document.querySelector('#sr-status[role="status"]'),
+      probesLive: document.getElementById('probes').hasAttribute('aria-live'),
+      order: document.getElementById('results').compareDocumentPosition(document.getElementById('device')) & 4,
+      fontLink: (document.querySelector('link[href*="fonts.googleapis.com/css2"]') || {}).media,
+    }));
+    assert.ok(s.main && s.status && !s.probesLive, `landmarks: <main>, a status region, no chatty live probe list (${JSON.stringify(s)})`);
+    assert.ok(s.order, 'results come before the device plate');
+    assert.equal(s.fontLink, 'print', 'font stylesheet is non-blocking (media=print until it loads)');
+
+    // Search: the input is never replaced and keeps focus; IME composition is not interrupted.
+    const q = await p.$('#q');
+    await q.focus();
+    await p.keyboard.type('qwen', { delay: 30 });
+    await p.waitForTimeout(400);
+    assert.ok(await p.evaluate((el) => el === document.getElementById('q') && document.activeElement === el, q), 'search box survives typing and keeps focus');
+    const cdp = await p.context().newCDPSession(p);
+    await p.fill('#q', '');
+    await q.focus();
+    await cdp.send('Input.insertText', { text: 'qw' });
+    await cdp.send('Input.imeSetComposition', { text: 'qwe', selectionStart: 3, selectionEnd: 3 });
+    await p.waitForTimeout(400);
+    await cdp.send('Input.insertText', { text: 'qwen' });
+    await p.waitForTimeout(400);
+    const v = await p.$eval('#q', (el) => el.value);
+    // A plain input ends with 'qwqwen' for this CDP sequence; rebuilding the box mid-composition gave 'qwqweqwen'.
+    assert.ok(v === 'qwqwen' && await p.evaluate((el) => el === document.getElementById('q'), q), `IME composition not duplicated (value ${JSON.stringify(v)})`);
+    await p.fill('#q', '');
+    await p.waitForTimeout(300);
+
+    // Keyboard focus stays on the control that re-rendered the results.
+    await p.focus('[data-action="filter"][data-filter="vision"]');
+    await p.keyboard.press('Enter');
+    assert.equal(await active(p), 'vision', 'focus stays on a filter chip after Enter');
+    await p.focus('[data-action="filter"][data-filter="all"]');
+    await p.keyboard.press('Enter');
+    await p.focus('.seg [data-target="browser"]');
+    await p.keyboard.press('Space');
+    assert.equal(await active(p), 'browser', 'focus stays on the view toggle');
+    await p.focus('.seg [data-target="native"]');
+    await p.keyboard.press('Space');
+    await p.focus('#g-well .more');
+    await p.keyboard.press('Enter');
+    assert.ok(await p.evaluate(() => { const a = document.activeElement; return a && a.classList.contains('model') && a.parentNode.children[25] === a; }), 'Show all moves focus to the first newly shown model');
+
+    // Correcting the GPU with the keyboard: arrows step through options, focus stays, badge says "you set".
+    await p.evaluate(() => { document.getElementById('fix').open = true; });
+    await p.focus('#ov-gpu');
+    for (let i = 0; i < 3; i++) { await p.keyboard.press('ArrowDown'); await p.waitForTimeout(50); }
+    await p.waitForTimeout(500);
+    const g = await p.evaluate(() => ({ idx: document.getElementById('ov-gpu').selectedIndex, focus: document.activeElement.id, open: document.getElementById('fix').open,
+      badge: Array.prototype.map.call(document.querySelectorAll('#device-body .conf'), (e) => e.textContent).join(',') }));
+    assert.ok(g.idx === 3 && g.focus === 'ov-gpu' && g.open, `GPU dropdown: arrows step, focus and panel stay (${JSON.stringify(g)})`);
+    assert.ok(g.badge.indexOf('you set') >= 0, `a corrected value is badged "you set" (${g.badge})`);
+
+    // Copy: a double click still restores the label.
+    await p.click('[data-action="reset-ov"]');
+    await p.waitForTimeout(100);
+    const btn = p.locator('.cmd button').first();
+    await btn.click(); await btn.click();
+    await p.waitForTimeout(1900);
+    assert.equal(await btn.textContent(), 'Copy', 'copy button label restored after a double click');
+    assert.ok(/^Copy command: /.test(await btn.getAttribute('aria-label')), 'copy buttons name their command');
+
+    // A saved filter hidden in the other view falls back to All instead of an empty page.
+    await p.click('[data-action="filter"][data-filter="video"]');
+    await p.click('.seg [data-target="browser"]');
+    const h = await p.evaluate(() => ({ pressed: Array.prototype.map.call(document.querySelectorAll('#r-chips [aria-pressed="true"]'), (e) => e.getAttribute('data-filter')).join(','),
+      rows: document.querySelectorAll('.model').length, noTitle: document.getElementById('gh-no').textContent }));
+    assert.ok(h.pressed === 'all' && h.rows > 0, `hidden saved filter shows All (${JSON.stringify(h)})`);
+    assert.equal(h.noTitle, 'Not in this browser', 'browser view titles the won\'t-run group');
+    await p.click('.seg [data-target="native"]');
+    assert.equal(await p.evaluate(() => document.querySelector('#r-chips [aria-pressed="true"]').getAttribute('data-filter')), 'video', 'saved filter comes back in the installed-app view');
+  } }, assert);
+
+  // Storage that throws: corrections still apply (kept in memory).
+  await runScenario(browser, pick('locked-down'), { after: async (p) => {
+    await p.click('[data-action="ram"][data-gb="64"]');
+    const s = await p.evaluate(() => ({ plate: document.getElementById('device-body').textContent, focus: document.activeElement.getAttribute('data-gb') }));
+    assert.ok(/Memory \(RAM\)64 GByou set/.test(s.plate), 'RAM correction applies without localStorage');
+    assert.equal(s.focus, '64', 'focus stays on the RAM chip that was clicked');
+  } }, assert);
+
+  // No Promise: the synchronous path still offers "Scan again".
+  const old = await runScenario(browser, pick('old browser'));
+  assert.ok(!old.rescanHidden, 'no-Promise path shows "Scan again"');
+
+  // In this browser with WebGPU: WebLLM builds are named, the headline names a chat model.
+  await runScenario(browser, WEBGPU_PC, { after: async (p) => {
+    await p.click('.seg [data-target="browser"]');
+    const s = await p.evaluate(() => ({ body: document.getElementById('results-body').textContent, headline: document.querySelector('.headline').textContent,
+      chat: (document.querySelector('.pick .m') || {}).textContent }));
+    assert.ok(s.body.indexOf('[object Object]') < 0 && /\(pick [\w.-]+-MLC/.test(s.body), 'WebLLM rows name the build to pick');
+    assert.ok(s.headline.indexOf(s.chat) >= 0, `headline chat model matches the "Best for chat" pick (${s.headline} / ${s.chat})`);
+    assert.ok(!/Florence/.test(s.headline + s.chat), 'captioning-only models are not called chat models');
+  } }, assert);
 }

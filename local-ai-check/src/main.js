@@ -5,6 +5,7 @@
   var U = LAC.util;
   var scanned = null; // raw scan result, before user corrections
   var scanning = false;
+  var overrides = null; // the user's corrections; kept here too in case storage is unavailable
 
   function show(d) {
     var budget = LAC.estimate.budget(d);
@@ -21,12 +22,11 @@
     if (!p) { finishSync(); return; }
     p.then(function (d) {
       scanning = false;
-      LAC.ui.showRescan(true);
       scanned = d;
       show(withOverrides(d));
+      LAC.ui.scanDone();
     }, function () {
       scanning = false;
-      LAC.ui.showRescan(true);
       finishSync();
     });
   }
@@ -39,9 +39,11 @@
     for (var i = 0; i < steps.length; i++) { LAC.ui.progress(steps[i], 'warn', i < 4 ? 'Basic check only' : 'Not supported by this browser'); }
     scanning = false;
     show(withOverrides(d));
+    LAC.ui.scanDone();
   }
 
-  function onOverride() {
+  function onOverride(ov) {
+    overrides = ov && (ov.ramGB || ov.gpuName) ? ov : null;
     if (!scanned) { return; }
     show(withOverrides(scanned));
   }
@@ -53,11 +55,12 @@
     if (d.gpu && d.gpu.entry && d.gpu.entry.name && LAC.GPUS) {
       for (var i = 0; i < LAC.GPUS.length; i++) { if (LAC.GPUS[i].name === d.gpu.entry.name) { d.gpu.entry = LAC.GPUS[i]; break; } }
     }
-    return LAC.applyOverrides(d, U.storage.get('overrides'));
+    return LAC.applyOverrides(d, overrides);
   }
 
   function start() {
     try {
+      overrides = U.storage.get('overrides');
       LAC.ui.init();
       LAC.ui.onOverride(onOverride);
       LAC.ui.onRescan(function () {
