@@ -91,11 +91,15 @@ export default async function test(assert) {
     const r = await load(tick, jitter).bench.cpu();
     const blocked = stopWatch();
     const ratio = r.score / native;
-    assert.ok(ratio > 0.6 && ratio < 1.6,
+    // A jittered edge can land anywhere in its bucket, so each chunk may be off by up to a tick
+    // either way; the tolerance is wider there.
+    const [lo, hi] = jitter ? [0.45, 2.2] : [0.6, 1.6];
+    assert.ok(ratio > lo && ratio < hi,
       `cpu score with a ${tick} ms${jitter ? ' jittered' : ''} timer (${r.score.toFixed(2)}) is close to native (${native.toFixed(2)})`);
     assert.ok(r.ms < 1300, `cpu bench with a ${tick} ms timer finishes in time (${Math.round(r.ms)} ms)`);
-    // One chunk may span one alignment tick plus one measured tick.
-    const allowed = Math.max(80, 2 * tick + 60);
+    // One chunk may span one alignment tick plus one measured tick; with jitter a single step of
+    // the clock can take up to two ticks.
+    const allowed = Math.max(80, (jitter ? 4 : 2) * tick + 60);
     assert.ok(blocked < allowed, `cpu bench with a ${tick} ms timer yields to the UI (longest block ${Math.round(blocked)} ms)`);
   }
   // A frozen clock gives no score instead of a made-up one.
