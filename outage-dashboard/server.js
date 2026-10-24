@@ -14,4 +14,9 @@ http.createServer((req, res) => {
   }
   res.setHeader('content-type', 'text/html; charset=utf-8');
   res.end(fs.readFileSync(path.join(__dirname, 'index.html')));
-}).listen(3000, () => console.log('http://localhost:3000'));
+}).listen(process.env.PORT || 3000, '0.0.0.0', () => {
+  const port = process.env.PORT || 3000;
+  console.log(`Local:   http://localhost:${port}`);
+  for (const list of Object.values(require('os').networkInterfaces()))
+    for (const i of list) if (i.family === 'IPv4' && !i.internal) console.log(`On phone: http://${i.address}:${port}`);
+});
