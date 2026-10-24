@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<title>Power Status</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--ink:#14161a;--mute:#6b7280;--line:#e5e7eb;--ok:#15803d;--okbg:#dcfce7;--bad:#b91c1c;--badbg:#fee2e2;--warn:#b45309;--warnbg:#fef3c7}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#181b21;--ink:#f1f3f5;--mute:#9aa3b2;--line:#262b34;--ok:#4ade80;--okbg:#10301c;--bad:#f87171;--badbg:#3b1416;--warn:#fbbf24;--warnbg:#3a2a0c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+main{max-width:480px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+header{display:flex;justify-content:space-between;align-items:center}
+h1{font-size:18px;margin:0}
+.sub{color:var(--mute);font-size:13px}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:10px 14px;min-height:44px}
+.hero{border-radius:20px;padding:28px 20px;text-align:center;background:var(--card);border:1px solid var(--line)}
+.hero.ok{background:var(--okbg);border-color:transparent;color:var(--ok)}
+.hero.bad{background:var(--badbg);border-color:transparent;color:var(--bad)}
+.hero.err{background:var(--warnbg);border-color:transparent;color:var(--warn)}
+.icon{font-size:44px;line-height:1}
+.state{font-size:28px;font-weight:700;margin:8px 0 2px}
+.hero p{margin:0;font-size:14px;opacity:.85}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:4px 16px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.row span:first-child{color:var(--mute)}
+.row span:last-child{font-weight:600;text-align:right;min-width:0;overflow-wrap:anywhere}
+.row span:first-child{flex:none}
+.edit{display:flex;gap:8px}
+input,select{font:inherit;flex:1;min-width:0;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:10px 12px;min-height:44px}
+footer{text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div><h1 id="title">Sector 21A, Faridabad</h1><div class="sub" id="checked">Checking…</div></div>
+    <button id="refresh" aria-label="Refresh">↻</button>
+  </header>
+
+  <section class="hero" id="hero" aria-live="polite">
+    <div class="icon" id="icon">⏳</div>
+    <div class="state" id="state">Checking…</div>
+    <p id="detail"></p>
+  </section>
+
+  <section class="card" id="facts" hidden></section>
+
+  <section class="edit">
+    <select id="district" aria-label="District"></select>
+    <input id="area" aria-label="Area" placeholder="Area, e.g. Sector 21A" autocapitalize="off">
+  </section>
+  <footer class="sub">Source: DHBVN outage portal · refreshes every minute</footer>
+</main>
+
+<script>
+const DISTRICTS={1:'Jind',2:'Fatehabad',3:'Sirsa',4:'Hisar',5:'Bhiwani',6:'Mahendragarh',7:'Rewari',8:'Gurugram',9:'Nuh',10:'Faridabad',11:'Palwal',12:'Charkhi Dadri'};
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{return localStorage.getItem(k)||d}catch{return d}},set(k,v){try{localStorage.setItem(k,v)}catch{}}};
+let district=store.get('district','10'), area=store.get('area','Sector 21A');
+
+$('district').innerHTML=Object.entries(DISTRICTS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+$('district').value=district; $('area').value=area;
+
+const MON={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function parse(s){const m=s&&s.match(/(\d+)-(\w+)-(\d+) (\d+):(\d+):(\d+)/);return m?new Date(Date.UTC(+m[3],MON[m[2]],+m[1],+m[4],+m[5],+m[6])-19800000):null} // portal times are IST
+function ago(d){const m=Math.max(0,Math.round((Date.now()-d)/60000));return m<60?`${m} min`:`${Math.floor(m/60)} h ${m%60} min`}
+function hhmm(d){return d.toLocaleTimeString([], {timeZone:'Asia/Kolkata',hour:'numeric',minute:'2-digit'})}
+function hero(cls,icon,state,detail){$('hero').className='hero '+cls;$('icon').textContent=icon;$('state').textContent=state;$('detail').textContent=detail}
+function facts(rows){$('facts').hidden=!rows.length;$('facts').innerHTML=rows.map(([a,b])=>`<div class="row"><span>${a}</span><span>${b}</span></div>`).join('')}
+
+async function load(){
+  $('title').textContent=`${area}, ${DISTRICTS[district]}`;
+  $('refresh').disabled=true;
+  try{
+    const r=await fetch(`/api/outages?district=${district}&area=${encodeURIComponent(area)}`,{cache:'no-store'});
+    const j=await r.json(); if(!r.ok) throw new Error(j.error||r.status);
+    $('checked').textContent=`Checked ${hhmm(new Date(j.fetchedAt))}`;
+    if(!j.matches.length){hero('ok','✅','Power on','No outage reported for this area.');facts([['Active outages in district',j.totalRows]]);return}
+    const m=j.matches[0], start=parse(m.start), rest=parse(m.restoration);
+    hero('bad','⚡','Power cut',start?`Out for ${ago(start)}`:'Outage reported');
+    const rows=[['Area',m.area],['Feeder',m.feeder]];
+    if(start) rows.push(['Started',start.toLocaleString([], {timeZone:'Asia/Kolkata',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})]);
+    rows.push(['Expected back',rest?hhmm(rest):'Not announced']);
+    if(m.address) rows.push(['Reason',m.address]);
+    if(rest&&rest<new Date()) rows.push(['Note','Estimate has passed']);
+    if(j.matches.length>1) rows.push(['Matching areas',j.matches.map(x=>x.area).join(', ')]);
+    facts(rows);
+  }catch(e){
+    hero('err','⚠️','Can’t check right now',String(e.message||e)); facts([]);
+  }finally{$('refresh').disabled=false}
+}
+
+$('refresh').onclick=load;
+$('district').onchange=e=>{district=e.target.value;store.set('district',district);load()};
+$('area').onchange=e=>{area=e.target.value.trim()||'Sector 21A';store.set('area',area);load()};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
+setInterval(load,60000); load();
+</script>
+</body>
+</html>
