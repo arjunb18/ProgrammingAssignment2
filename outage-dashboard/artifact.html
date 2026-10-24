@@ -1,0 +1,376 @@
+<title>Sector 21A Power</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Saira+Condensed:wght@600;700;800&family=Martian+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow column, a status slab on top, then the restoration track, then the rest of the feeder and district. */
+:root{
+  --bg:#eef1f4; --surface:#ffffff; --ink:#111a2b; --mute:#5d6878; --line:#d9dfe6;
+  --accent:#d98a00; --accent-ink:#1b1200;
+  --on:#13804a; --on-bg:#e2f4ea; --out:#c3341f; --out-bg:#fbe7e3; --stale:#8a6100; --stale-bg:#fbf1d6;
+  --display:"Saira Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Familjen Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Martian Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1018; --surface:#141b26; --ink:#e9eef5; --mute:#94a0b2; --line:#232d3c;
+  --accent:#f2a91f; --accent-ink:#1b1200;
+  --on:#4fd18b; --on-bg:#0f2a1d; --out:#ff7a63; --out-bg:#34140f; --stale:#f0c25a; --stale-bg:#2e240c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1018; --surface:#141b26; --ink:#e9eef5; --mute:#94a0b2; --line:#232d3c;
+  --accent:#f2a91f; --accent-ink:#1b1200;
+  --on:#4fd18b; --on-bg:#0f2a1d; --out:#ff7a63; --out-bg:#34140f; --stale:#f0c25a; --stale-bg:#2e240c; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px}
+main{max-width:460px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.label{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
+
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+header h1{font:800 34px/1 var(--display);letter-spacing:.01em;margin:0;text-wrap:balance}
+header .where{color:var(--mute);font-size:14px;margin-top:4px}
+.area-btn{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 14px var(--body);border-radius:999px;padding:8px 14px;min-height:40px;cursor:pointer}
+
+.slab{border-radius:22px;padding:22px 20px 20px;display:grid;gap:14px;background:var(--surface);border:1px solid var(--line)}
+.slab[data-state="out"]{background:var(--out-bg);border-color:transparent}
+.slab[data-state="on"]{background:var(--on-bg);border-color:transparent}
+.state-row{display:flex;align-items:center;gap:12px}
+.bulb{width:46px;height:46px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--line)}
+.slab[data-state="out"] .bulb{background:var(--out)}
+.slab[data-state="on"] .bulb{background:var(--on);box-shadow:0 0 0 6px color-mix(in srgb,var(--on) 22%,transparent)}
+.bulb svg{width:24px;height:24px}
+.state{font:800 44px/0.95 var(--display);letter-spacing:.005em;margin:0;text-transform:uppercase}
+.slab[data-state="out"] .state{color:var(--out)}
+.slab[data-state="on"] .state{color:var(--on)}
+.elapsed{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.elapsed .num{font-size:30px;font-weight:500}
+.elapsed span:last-child{color:var(--mute);font-size:14px}
+.slab p{margin:0;color:var(--mute);font-size:15px}
+
+.track{display:grid;gap:8px}
+.bar{position:relative;height:10px;border-radius:999px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:visible}
+.bar .fill{position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--accent);max-width:100%}
+.bar .now{position:absolute;top:-5px;width:4px;height:20px;border-radius:2px;background:var(--ink);transform:translateX(-2px)}
+.ends{display:flex;justify-content:space-between;font-size:13px;color:var(--mute)}
+.ends b{display:block;color:var(--ink);font:500 14px var(--mono)}
+.ends div:last-child{text-align:right}
+.eta{font-weight:600;font-size:15px}
+.eta.late{color:var(--out)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:10px}
+.card h2{margin:0;font:700 20px/1.1 var(--display);letter-spacing:.02em;text-transform:uppercase}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 16px;margin:0}
+.kv dt{color:var(--mute)}
+.kv dd{margin:0;text-align:right;font-weight:600;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:13px;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.chip.me{background:var(--accent);color:var(--accent-ink);font-weight:600}
+
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat{display:grid;gap:2px}
+.stat b{font:500 26px var(--mono);font-variant-numeric:tabular-nums}
+details{border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center}
+.feeders{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}
+.feeders li{display:grid;gap:2px}
+.feeders li span{color:var(--mute);font-size:13px}
+
+.check{display:grid;gap:8px}
+.check button{min-height:52px;border-radius:14px;border:0;background:var(--ink);color:var(--bg);font:700 18px var(--display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.check button:disabled{opacity:.55;cursor:default}
+.check p{margin:0;font-size:13px;color:var(--mute);text-align:center}
+.fresh{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:var(--mute)}
+.fresh.old{color:var(--stale);background:var(--stale-bg);border-radius:12px;padding:8px 12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--on)}
+.fresh.old .dot{background:var(--stale)}
+.checking .dot{animation:pulse 1.2s ease-in-out infinite;background:var(--accent)}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.checking .dot{animation:none}}
+
+.sheet{display:grid;gap:10px}
+.sheet input{font:inherit;min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 14px;width:100%}
+.sheet .row{display:flex;gap:8px}
+.sheet button{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 15px var(--body);cursor:pointer}
+.sheet button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+footer{text-align:center;font-size:12px;color:var(--mute)}
+</style>
+
+<main>
+  <header>
+    <div>
+      <h1 id="title">Sector 21A</h1>
+      <div class="where" id="where">Faridabad</div>
+    </div>
+    <button class="area-btn" id="change" type="button">Change area</button>
+  </header>
+
+  <section class="card sheet" id="sheet" hidden>
+    <label class="label" for="area-input">Your area, as DHBVN names it</label>
+    <input id="area-input" list="area-list" autocomplete="off" placeholder="Sector 21A">
+    <datalist id="area-list"></datalist>
+    <div class="row">
+      <button type="button" id="cancel">Cancel</button>
+      <button type="button" id="save" class="primary">Watch this area</button>
+    </div>
+  </section>
+
+  <section class="slab" id="slab" aria-live="polite">
+    <div class="state-row">
+      <div class="bulb" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+      </div>
+      <h2 class="state" id="state">Loading</h2>
+    </div>
+    <div class="elapsed" id="elapsed" hidden><span class="num" id="clock">0:00:00</span><span>without power</span></div>
+    <p id="summary">Reading the latest DHBVN outage list.</p>
+    <div class="track" id="track" hidden>
+      <div class="bar"><div class="fill" id="fill"></div><div class="now" id="now"></div></div>
+      <div class="ends">
+        <div><span class="label">Cut at</span><b id="t-start">–</b></div>
+        <div><span class="label">Expected back</span><b id="t-end">–</b></div>
+      </div>
+      <div class="eta" id="eta"></div>
+    </div>
+  </section>
+
+  <section class="check">
+    <div class="fresh" id="fresh"><span class="dot"></span><span id="fresh-text">Waiting for data</span></div>
+    <button type="button" id="check" hidden>Check DHBVN now</button>
+    <p id="check-note" hidden></p>
+  </section>
+
+  <section class="card" id="feeder-card" hidden>
+    <h2>Your feeder</h2>
+    <dl class="kv">
+      <dt>Feeder</dt><dd id="f-name">–</dd>
+      <dt>DHBVN note</dt><dd id="f-reason">–</dd>
+    </dl>
+    <div class="label">Areas out on this feeder</div>
+    <div class="chips" id="f-areas"></div>
+  </section>
+
+  <section class="card" id="city-card" hidden>
+    <h2>Faridabad right now</h2>
+    <div class="stats">
+      <div class="stat"><b id="c-areas">0</b><span class="label">Areas out</span></div>
+      <div class="stat"><b id="c-feeders">0</b><span class="label">Feeders down</span></div>
+    </div>
+    <details>
+      <summary>All feeders with a cut</summary>
+      <ul class="feeders" id="c-list"></ul>
+    </details>
+  </section>
+
+  <footer>Data: DHBVN Samadhan outage list, Faridabad. Refreshed hourly by Claude.</footer>
+</main>
+
+<script>
+const TRIGGER_ID = "trig_01SSa81pmoqzFEC5uqrzdNf6";
+const DOC = "outages/faridabad";
+const use = (n) => (window.claude && window.claude.use ? window.claude.use(n) : Promise.resolve(null));
+const COOLDOWN_MS = 10 * 60 * 1000;
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+
+let area = store.get("area", "Sector 21A");
+let data = null;
+let checkingSince = Number(store.get("checkingSince", 0));
+let checkingFrom = store.get("checkingFrom", "");
+
+const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+const ist = (d, opts) => d.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour: "numeric", minute: "2-digit", ...opts });
+function dur(ms) {
+  const m = Math.max(0, Math.round(ms / 60000));
+  if (m < 60) return `${m} min`;
+  return `${Math.floor(m / 60)} h ${m % 60} min`;
+}
+function clock(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  return `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+}
+
+function matchesFor(rows) { const q = norm(area); return rows.filter((r) => norm(r.area).includes(q)); }
+
+function render() {
+  $("title").textContent = area;
+  if (!data) return;
+  const rows = Array.isArray(data.rows) ? data.rows : [];
+  const mine = matchesFor(rows);
+  const hit = mine[0];
+  const slab = $("slab");
+
+  // District summary
+  const feeders = new Map();
+  for (const r of rows) {
+    if (!feeders.has(r.feeder)) feeders.set(r.feeder, []);
+    feeders.get(r.feeder).push(r);
+  }
+  $("city-card").hidden = false;
+  $("c-areas").textContent = rows.length;
+  $("c-feeders").textContent = feeders.size;
+  $("c-list").replaceChildren(...[...feeders].sort((a, b) => b[1].length - a[1].length).map(([f, list]) => {
+    const li = document.createElement("li");
+    const b = document.createElement("b"); b.textContent = f;
+    const s = document.createElement("span");
+    const since = list[0].start ? ` · since ${ist(new Date(list[0].start))}` : "";
+    s.textContent = list.map((r) => r.area).join(", ") + since;
+    li.append(b, s);
+    return li;
+  }));
+  $("area-list").replaceChildren(...[...new Set(rows.map((r) => r.area))].sort().map((a) => Object.assign(document.createElement("option"), { value: a })));
+
+  if (!hit) {
+    slab.dataset.state = "on";
+    $("state").textContent = "Power on";
+    $("elapsed").hidden = true;
+    $("track").hidden = true;
+    $("summary").textContent = `${area} is not on DHBVN's outage list.`;
+    const last = store.get("feeder:" + norm(area), "");
+    $("where").textContent = last ? `Faridabad · ${last} feeder` : "Faridabad";
+    $("feeder-card").hidden = true;
+    return;
+  }
+
+  store.set("feeder:" + norm(area), hit.feeder);
+  $("where").textContent = `Faridabad · ${hit.feeder} feeder`;
+  slab.dataset.state = "out";
+  $("state").textContent = "Power cut";
+  const start = hit.start ? new Date(hit.start) : null;
+  const end = hit.restoration ? new Date(hit.restoration) : null;
+  $("elapsed").hidden = !start;
+  $("summary").textContent = `DHBVN lists ${hit.area} as out on the ${hit.feeder} feeder.`;
+
+  $("track").hidden = !start;
+  if (start) {
+    $("t-start").textContent = ist(start, { day: "numeric", month: "short" });
+    $("t-end").textContent = end ? ist(end) : "Not given";
+  }
+  $("feeder-card").hidden = false;
+  $("f-name").textContent = hit.feeder;
+  $("f-reason").textContent = hit.reason || "None given";
+  const mineSet = new Set(mine.map((r) => r.area));
+  $("f-areas").replaceChildren(...(feeders.get(hit.feeder) || []).map((r) => {
+    const c = document.createElement("span");
+    c.className = "chip" + (mineSet.has(r.area) ? " me" : "");
+    c.textContent = r.area;
+    return c;
+  }));
+  tick();
+}
+
+function tick() {
+  const now = Date.now();
+  if (data) {
+    const at = new Date(data.fetchedAt);
+    const age = now - at;
+    const f = $("fresh");
+    f.classList.toggle("old", age > 90 * 60000);
+    f.classList.toggle("checking", isChecking());
+    $("fresh-text").textContent = isChecking()
+      ? "Checking DHBVN now. This takes about 2 minutes."
+      : `DHBVN data from ${ist(at)} · ${dur(age)} ago${age > 90 * 60000 ? ". Updates may be paused." : ""}`;
+  }
+  const hit = data && matchesFor(data.rows || [])[0];
+  if (!hit || !hit.start) return;
+  const start = new Date(hit.start).getTime();
+  $("clock").textContent = clock(now - start);
+  const end = hit.restoration ? new Date(hit.restoration).getTime() : 0;
+  const eta = $("eta");
+  if (end > start) {
+    const p = Math.min(1, Math.max(0, (now - start) / (end - start)));
+    $("fill").style.width = p * 100 + "%";
+    $("now").style.left = p * 100 + "%";
+    eta.classList.toggle("late", now > end);
+    eta.textContent = now > end ? `Overdue by ${dur(now - end)}` : `Back in about ${dur(end - now)}`;
+  } else {
+    $("fill").style.width = "0%";
+    $("now").style.left = "0%";
+    eta.classList.remove("late");
+    eta.textContent = "DHBVN has not given a restoration time.";
+  }
+}
+
+// Check now: runs the hourly refresh task immediately through the Claude Code Remote connector.
+function isChecking() { return checkingSince && Date.now() - checkingSince < 6 * 60000 && (!data || data.fetchedAt === checkingFrom); }
+function updateCheckButton() {
+  const btn = $("check");
+  const cooling = Date.now() - checkingSince < COOLDOWN_MS;
+  btn.disabled = isChecking() || cooling;
+  btn.textContent = isChecking() ? "Checking…" : cooling ? "Checked recently" : "Check DHBVN now";
+}
+function note(text) { $("check-note").hidden = !text; $("check-note").textContent = text || ""; }
+
+async function setupCheck() {
+  if (!TRIGGER_ID) return;
+  const mcp = await use("mcp");
+  if (!mcp) return;
+  const btn = $("check");
+  btn.hidden = false;
+  updateCheckButton();
+  setInterval(updateCheckButton, 15000);
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    btn.textContent = "Starting…";
+    try {
+      await mcp.callTool("Claude Code Remote", "fire_trigger", { trigger_id: TRIGGER_ID }, { cache: false });
+      checkingSince = Date.now();
+      checkingFrom = data ? data.fetchedAt : "";
+      store.set("checkingSince", String(checkingSince));
+      store.set("checkingFrom", checkingFrom);
+      note("");
+    } catch (e) {
+      const code = e && e.code;
+      if (code === "approval_required" || code === "not_in_manifest") note("Check now needs your approval for Claude Code Remote. Tap again and choose Allow.");
+      else if (code === "server_not_connected" || code === "needs_reauth") note("Check now needs the Claude Code Remote connector. Hourly updates still run.");
+      else note("Could not start a check. Hourly updates still run.");
+    }
+    updateCheckButton();
+    tick();
+  });
+}
+
+// Area sheet
+$("change").addEventListener("click", () => { $("sheet").hidden = false; $("area-input").value = area; $("area-input").focus(); });
+$("cancel").addEventListener("click", () => { $("sheet").hidden = true; });
+function saveArea() {
+  const v = $("area-input").value.trim();
+  if (v) { area = v; store.set("area", v); }
+  $("sheet").hidden = true;
+  render();
+}
+$("save").addEventListener("click", saveArea);
+$("area-input").addEventListener("keydown", (e) => { if (e.key === "Enter") saveArea(); });
+
+async function start() {
+  render();
+  setInterval(tick, 1000);
+  const db = await use("db");
+  if (!db) {
+    $("state").textContent = "Offline";
+    $("summary").textContent = "Live status loads when this page is open in Claude while signed in.";
+    $("fresh-text").textContent = "No live data in this view";
+    return;
+  }
+  db.doc(DOC).onSnapshot((snap) => {
+    if (!snap.exists) {
+      $("state").textContent = "No data";
+      $("summary").textContent = "The first DHBVN reading has not arrived yet.";
+      return;
+    }
+    data = snap.data();
+    render();
+    updateCheckButton();
+  }, () => {
+    $("fresh-text").textContent = "Live updates stopped. Reload the page.";
+  });
+  setupCheck();
+}
+start();
+</script>
